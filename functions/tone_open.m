@@ -11,7 +11,13 @@ needed = p.use_tone && ((p.use_naming && p.tone_naming) || p.tone_adjective);
 if ~needed, return; end
 try
     InitializePsychSound(1);
-    pah = PsychPortAudio('Open', p.tone_device, 1, 1, [], 2);
+    % low-latency mode (class 2) so the scheduled onset is honoured; fall back
+    % to class 1 if the device refuses
+    try
+        pah = PsychPortAudio('Open', p.tone_device, 1, 2, [], 2);
+    catch
+        pah = PsychPortAudio('Open', p.tone_device, 1, 1, [], 2);
+    end
     s = PsychPortAudio('GetStatus', pah);
     fs = s.SampleRate;
     t = (0:round(p.tone_dur * fs) - 1) / fs;
@@ -19,7 +25,8 @@ try
     y = p.tone_volume * sin(2 * pi * p.tone_freq * t) .* ramp;
     PsychPortAudio('FillBuffer', pah, [y; y]);
     tone = struct('pah', pah, 'fs', fs);
-    fprintf('Answer tone ready: %d Hz, %.0f ms, volume %.2f.\n', p.tone_freq, p.tone_dur * 1000, p.tone_volume);
+    fprintf('Answer tone ready: %d Hz, %.0f ms, volume %.2f, output latency %.0f ms.\n', ...
+        p.tone_freq, p.tone_dur * 1000, p.tone_volume, s.PredictedLatency * 1000);
 catch ME
     warning('tone_open:failed', 'No playback device for the answer tone (%s); trials run silently.', ME.message);
 end

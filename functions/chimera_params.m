@@ -90,7 +90,8 @@ p.voice_threshold   = 0.1;      % amplitude for the online voice-onset estimate 
 %% answer tone: soft beep when it is time to answer; its onset is sent to the
 %% daq as the question pulse (sync). Naming trials: replaces the written prompt.
 p.use_tone       = true;
-p.tone_naming    = true;        % naming trials: tone at display_time, no text
+p.tone_naming    = true;        % naming trials: answer tone, no text
+p.tone_delay     = [];          % s after image onset ([] = display_time, same epoch as adjective trials)
 p.tone_adjective = false;       % adjective trials: also beep when the words appear
 p.tone_freq      = 750;         % Hz
 p.tone_dur       = 0.12;        % s

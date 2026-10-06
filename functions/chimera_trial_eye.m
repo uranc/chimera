@@ -44,7 +44,9 @@ if is_naming
     %% answer cue at display_time: soft tone (or the written prompt if
     %% tone_naming is off); the image stays until the spoken response ends
     if p.tone_naming
-        res.ts_question = tone_play(hw.tone, res.ts_stim_on + p.display_time);
+        delay = p.display_time;
+        if ~isempty(p.tone_delay), delay = p.tone_delay; end
+        res.ts_question = tone_play(hw.tone, res.ts_stim_on + delay);
     else
         draw_image(w, tex, dest, hw, p);
         Screen('TextSize', w, p.text_size_prompt);
