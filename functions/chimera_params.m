@@ -13,7 +13,7 @@ p.task_type = TaskCodes.task('chimera');
 p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS>, on every saved file
 
 %% stimuli
-% '' -> stimuli/subject<NNN>_stimset<NN> (patient_id, session_nr), one flat folder
+% '' -> stimuli/subject<NNN>/subject<NNN>_stimset<NN> (patient_id, session_nr)
 p.stim_dir       = '';
 % filters on the parsed filenames, [] = keep all
 p.step_subset    = [1 2 3];     % levels: 1..3 generated (0 = original, used by the mini-screening)
@@ -78,7 +78,7 @@ p.continue_key    = 'Space';
 p.abort_key       = 'F10';      % ends the session (data so far is saved)
 
 %% practice (images of concepts that are NOT in the session)
-p.practice_dir      = '';       % '' -> concepts in stim_dir that are not in the session
+p.practice_dir      = '';       % '' -> stimuli/subject<NNN>/practice (concepts outside the session)
 p.n_practice_naming = 1;
 p.n_practice_adj    = 3;
 

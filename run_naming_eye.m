@@ -37,13 +37,17 @@ ev = TaskCodes.EVENTS;                         % event codes, see functions/Task
 
 stim_dir = p.stim_dir;
 if isempty(stim_dir)
-    stim_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d_stimset%02d', patient_id, session_nr));
+    stim_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), ...
+        sprintf('subject%03d_stimset%02d', patient_id, session_nr));
 end
 log_dir = prepare_log_dir(fullfile(base_dir, 'logs', sprintf('%d', patient_id), ...
     sprintf('%d_%d', patient_id, session_nr)));
 % every file of this run carries its start time, so no run can overwrite another
 p.file_prefix = sprintf('%s_%s', p.task_name, datestr(now, 'yyyymmdd_HHMMSS'));
 
+if isempty(p.practice_dir)                     % the subject's practice folder, if there is one
+    p.practice_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), 'practice');
+end
 if isempty(p.rng_seed), rng('shuffle'); else, rng(p.rng_seed); end
 rng_state = rng;
 

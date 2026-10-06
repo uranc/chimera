@@ -15,16 +15,15 @@ o.kb_mode         = 'poll';            % KbCheck: also works over remote desktop
 o.dynamic_fcn_dir = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                      fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                      '/home/uranc/Documents/dynamic/code/experiment/functions'};
-% stimuli: the default folder, stimuli/subject099_stimset01 for the dummies'
-% patient 99 / session 1 (setup/make_stimset.py --subject 99 --stimset 1 ...)
-o.practice_dir   = fullfile(here, 'stimuli', 'practice');   % 2 other concepts (owl, bell)
+% stimuli: the default folders for the dummies' patient 99 / session 1:
+% stimuli/subject099/subject099_stimset01 and stimuli/subject099/practice
+% (setup/make_stimset.py --subject 99 ...)
 switch task
     case {'chimera', 'naming'}
         o.text_size_words  = 20;
         o.text_size_prompt = 16;
     case 'spose'
         o.text_size_prompt = 16;
-        o = rmfield(o, 'practice_dir');   % no practice in this task
     otherwise
         error('dummy_overrides:task', 'unknown task "%s"', task);
 end

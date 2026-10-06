@@ -5,7 +5,8 @@ Source (cso/_pending_stimuli_realvis_cn_preview_all12):
     <axis-name>/c<things_id>_<concept>_inst<i>/f000.jpg .. f006.jpg + dense_alphas.npy
     f000 = original (alpha 0); f001..f006 = generated (alpha 0.9 .. 5.5)
 
-Output: ONE flat folder per session, stimuli/subject<NNN>_stimset<NN>/:
+Output: one folder per subject, stimuli/subject<NNN>/, holding
+    subject<NNN>_stimset<NN>/   the session's generated images (flat):
     a<a>_<axisname><dim>_c<c>_<conceptname><things>_inst<k>_level<L>.jpg
         a      = axis index in this set (1..8, in SPoSE order; sent on the daq)
         dim    = SPoSE dimension number (1..66, 66-d embedding)
@@ -13,17 +14,19 @@ Output: ONE flat folder per session, stimuli/subject<NNN>_stimset<NN>/:
         things = THINGS concept number (1..1854, unique_id.txt order)
         k      = source instance, L = 1..3 generated level (frames 2, 4, 6)
         e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg
-    a0_original0_c<c>_<conceptname><things>_inst<k>_level0.jpg
-        the original photo (identical on every axis, stored once; mini-screening)
-    stimset_map.csv   per file: indices, SPoSE dim, THINGS number, instance, frame, alpha
+        stimset_map.csv   per file: indices, SPoSE dim, THINGS number, instance, frame, alpha
+    originals/a0_original0_c<c>_<conceptname><things>_inst<k>_level0.jpg
+        the original photos (identical on every axis, stored once; mini-screening)
+    practice/   practice images (--practice), concepts outside the sessions
 Concept names must not end in a digit (the THINGS number follows directly).
 
 Patient session (THINGS numbers of the screened concepts):
     python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts 681 887 344 575
-    -> stimuli/subject001_stimset01/   (run_chimera_eye(1, 1) reads it by default)
-Example / test (4 random concepts, seeded):
-    python3 setup/make_stimset.py --subject 99 --stimset 1 --random 4 --seed 1
-Any other folder: --out <dir>
+    -> stimuli/subject001/subject001_stimset01/ + stimuli/subject001/originals/
+       (run_chimera_eye(1, 1) reads them by default)
+Practice images for that subject (other concepts, one instance):
+    python3 setup/make_stimset.py --subject 1 --practice --concepts 1092 117 --inst 0
+Any other folder: --out <dir> (originals then go to <dir>/originals)
 """
 import argparse, os, shutil, sys
 import numpy as np
@@ -42,16 +45,22 @@ ap.add_argument('--src', default=SRC)
 ap.add_argument('--out', help='output folder (default: stimuli/subject<NNN>_stimset<NN>)')
 ap.add_argument('--subject', type=int)
 ap.add_argument('--stimset', type=int)
+ap.add_argument('--practice', action='store_true', help='write the subject practice folder (no originals)')
 ap.add_argument('--concepts', type=int, nargs='*', help='THINGS concept numbers (default: all available)')
 ap.add_argument('--things', default=THINGS_IDS, help='THINGS unique_id.txt (concept order)')
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
 ap.add_argument('--seed', type=int, default=1)
 ap.add_argument('--inst', type=int, nargs='*', help='source instances to copy (default: all)')
 a = ap.parse_args()
+orig_dir = None
 if a.out is None:
-    if a.subject is None or a.stimset is None:
-        sys.exit('give --subject and --stimset (or --out)')
-    a.out = os.path.join(os.path.dirname(__file__), '..', 'stimuli', f'subject{a.subject:03d}_stimset{a.stimset:02d}')
+    if a.subject is None or (a.stimset is None and not a.practice):
+        sys.exit('give --subject and --stimset (or --subject --practice, or --out)')
+    subj = os.path.join(os.path.dirname(__file__), '..', 'stimuli', f'subject{a.subject:03d}')
+    a.out = os.path.join(subj, 'practice') if a.practice else os.path.join(subj, f'subject{a.subject:03d}_stimset{a.stimset:02d}')
+    orig_dir = None if a.practice else os.path.join(subj, 'originals')
+elif not a.practice:
+    orig_dir = os.path.join(a.out, 'originals')
 
 # generated concepts -> THINGS number (1-based line in unique_id.txt)
 things = {n.strip(): i + 1 for i, n in enumerate(open(a.things)) if n.strip()}
@@ -91,10 +100,12 @@ for ci, tid in enumerate(concepts, start=1):
                 shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
                 rows.append((fn, ai, axis, dim, ci, cname, tid, src_inst, lev, f, alphas[f]))
                 n += 1
-            orig = f'a0_original0_c{ci}_{cname}{tid}_inst{src_inst}_level0.jpg'
-            if not os.path.exists(os.path.join(a.out, orig)):
-                shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(a.out, orig))
-                rows.append((orig, 0, 'original', 0, ci, cname, tid, src_inst, 0, 0, alphas[0]))
+            if orig_dir:
+                orig = f'a0_original0_c{ci}_{cname}{tid}_inst{src_inst}_level0.jpg'
+                if not os.path.exists(os.path.join(orig_dir, orig)):
+                    os.makedirs(orig_dir, exist_ok=True)
+                    shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
+                    rows.append(('../originals/' + orig, 0, 'original', 0, ci, cname, tid, src_inst, 0, 0, alphas[0]))
                 n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:

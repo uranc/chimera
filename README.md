@@ -16,20 +16,20 @@ saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, 
 | steering prototypes (test screens only) | | `run_steer_dummy.m`, `run_respmax_dummy.m` | in the script | |
 
 - Rig: `run_chimera_eye(patient_id, session_nr)`. Stimuli are read from
-  `stimuli/subject<NNN>_stimset<NN>/`, logs written to `logs/<pid>/<pid>_<sess>/`.
+  `stimuli/subject<NNN>/subject<NNN>_stimset<NN>/`, logs written to `logs/<pid>/<pid>_<sess>/`.
 - The dummy scripts run exactly the rig code with the overrides in `functions/dummy_overrides.m`: no DAQ,
   no eye tracker, windowed, keyboard polling, example stimuli.
-- Stimuli (not in git): `setup/make_stimset.py` builds one flat folder per session,
-  `stimuli/subject<NNN>_stimset<NN>/`, with `a<a>_<axis><dim>_c<c>_<concept><things>_inst<k>_level<L>.jpg`,
+- Stimuli (not in git): `setup/make_stimset.py` builds `stimuli/subject<NNN>/` with
+  `subject<NNN>_stimset<NN>/` (one flat folder per session), `originals/` and `practice/`; files `a<a>_<axis><dim>_c<c>_<concept><things>_inst<k>_level<L>.jpg`,
   e.g. `a8_outdoors13_c1_glove681_inst0_level2.jpg`: a, c = indices in the set (sent on the daq),
   dim = SPoSE dimension (66-d), things = THINGS number (1-1854), k = source instance, levels 1-3
-  generated; originals as `a0_original0_c<c>_<concept><things>_inst<k>_level0.jpg` (mini-screening).
+  generated; originals in `originals/a0_original0_c<c>_<concept><things>_inst<k>_level0.jpg` (mini-screening).
   `stimset_map.csv` lists source frame and alpha per file.
   Chimera uses `step_subset = [1 2 3]` (levels) and `inst_subset = 0`.
-  One flat folder per session: `stimuli/subject<NNN>_stimset<NN>/` (read by default for patient NNN, session NN).
+  Read by default for patient NNN, session NN.
   Patient: `python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts <THINGS numbers>`
   Example (dummies, patient 99): `python3 setup/make_stimset.py --subject 99 --stimset 1 --concepts 681 887 344 575`
-  Practice (dummies): `python3 setup/make_stimset.py --concepts 1092 117 --inst 0 --out stimuli/practice`
+  Practice: `python3 setup/make_stimset.py --subject 99 --practice --concepts 1092 117 --inst 0`
 - Every saved file starts with `<task>_<yyyymmdd_HHMMSS>`, so runs never overwrite each other.
 - Gamepad: read by Psychtoolbox (`functions/gamepad_keys.m`); optional `calibrate_gamepad` saves a mapping.
 - The dynamic paradigm's `functions` folder must be on the path (or set `dynamic_fcn_dir`).
