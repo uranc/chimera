@@ -4,7 +4,7 @@ function run_respmax_dummy(concept_id, n_trials)
 %
 % Stimulus space = a star: the concept's original (alpha 0) in the centre,
 % one ray per axis (stimset120: axes 1,2,3,5) with the generated steps.
-% Input: arrow keys (or a gamepad / joystick if one is connected).
+% Input: arrow keys or the gamepad (gamepad_keys: d-pad/stick = arrows, A = Space).
 %   Up / Left / Right / Down each belong to one axis. Pressing an axis's
 %   direction moves one step out along that axis if you are in the centre
 %   or on that ray; on another ray it moves one step back toward the centre.
@@ -69,8 +69,6 @@ dest = OffsetRect(dest, -0.12 * wrect(3), 0);        % image left, reference rig
 ref = CenterRectOnPoint([0 0 0.18 0.18] .* wrect([3 4 3 4]), wrect(3) * 0.82, wrect(4) / 2);
 dots_img = dot_frame(dest, frame_width, n_dots_max);   % fixed positions: no flicker
 dots_ref = dot_frame(ref, frame_width, n_dots_max);
-has_pad = exist('Gamepad', 'file') == 2 && Gamepad('GetNumGamepads') > 0;
-if has_pad, disp('Gamepad found: axes 1/2 move the image.'); end
 
 results = struct('trial', {}, 'target', {}, 'path', {}, 'times', {}, 'final', {}, 'score', {}, 'rt', {});
 try
@@ -83,15 +81,9 @@ try
         while ~done
             % input -> direction (1..4) or 0
             d = 0;
-            [~, t, kc] = KbCheck;
+            [~, t, kc] = check_keys();      % keyboard + gamepad
             for k = 1:numel(axes_)
                 if kc(KbName(dir_keys{k})), d = k; end
-            end
-            if has_pad && d == 0
-                x = Gamepad('GetAxis', 1, 1) / 32768; y = Gamepad('GetAxis', 1, 2) / 32768;
-                if max(abs([x y])) > 0.5
-                    if abs(y) >= abs(x), d = 1 + 3 * (y > 0); else, d = 2 + (x > 0); end
-                end
             end
             if kc(KbName('Space')), done = true; end
             if kc(KbName('Escape')), done = true; quit_all = true; end

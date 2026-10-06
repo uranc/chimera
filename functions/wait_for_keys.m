@@ -7,6 +7,7 @@ function [k, t_key, aborted] = wait_for_keys(key_names, abort_key, timeout, t_re
 %   t_key     : KbQueue time stamp of the press (GetSecs clock), NaN on timeout
 %   poll_fn   : optional function called on every polling cycle (e.g. to fetch audio)
 % kb_mode('poll') switches to KbCheck polling (remote testing over VNC).
+% The gamepad (gamepad_keys) counts as keys in both modes; only new presses.
 if nargin < 3 || isempty(timeout), timeout = Inf; end
 if nargin < 4 || isempty(t_ref), t_ref = GetSecs; end
 if nargin < 5, poll_fn = []; end
@@ -21,6 +22,7 @@ keys([codes, abort_code]) = 1;
 KbQueueCreate([], keys);
 KbQueueStart;
 k = 0; t_key = NaN; aborted = false;
+pad_prev = gamepad_keys();                 % buttons held on entry do not count
 while true
     [pressed, firstPress] = KbQueueCheck;
     if pressed
@@ -35,6 +37,11 @@ while true
             break
         end
     end
+    [pad, t_pad] = gamepad_keys();
+    new = pad & ~pad_prev; pad_prev = pad;
+    if new(abort_code), aborted = true; t_key = t_pad; break; end
+    j = find(new(codes), 1);
+    if ~isempty(j), k = j; t_key = t_pad; break; end
     if GetSecs - t_ref >= timeout, break; end
     if ~isempty(poll_fn), poll_fn(); end
     WaitSecs(0.001);     % small yield so this does not spin the CPU at 100%
@@ -47,8 +54,12 @@ end
 function [k, t_key, aborted] = poll_keys(codes, abort_code, timeout, t_ref, poll_fn)
 KbReleaseWait;
 k = 0; t_key = NaN; aborted = false;
+pad_prev = gamepad_keys();
 while GetSecs - t_ref < timeout
     [down, t, kc] = KbCheck;
+    [pad, t_pad] = gamepad_keys();
+    new = pad & ~pad_prev; pad_prev = pad;
+    if any(new), kc = logical(kc) | new; down = true; t = t_pad; end
     if down
         if kc(abort_code), aborted = true; t_key = t; return; end
         j = find(kc(codes), 1);

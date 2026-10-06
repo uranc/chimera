@@ -73,7 +73,7 @@ try
         t0 = GetSecs; t_last = -Inf; done = false; timed_out = false;
         KbReleaseWait;
         while ~done
-            [~, t, kc] = KbCheck;
+            [~, t, kc] = check_keys();      % keyboard + gamepad
             for k = 1:numel(axes_)
                 if kc(KbName(keys{k})) && t - t_last >= step_hold
                     pos = step(pos, map(k), n_steps);
