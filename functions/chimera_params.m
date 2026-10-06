@@ -60,6 +60,11 @@ p.text_size_words   = 40;       % adjective words
 p.text_size_prompt  = 34;       % prompts and messages
 p.word_dx           = 0.22;     % word diamond: horizontal offset (fraction of screen width)
 p.word_dy           = 0.20;     % word diamond: vertical offset (fraction of screen height)
+p.highlight_color   = [255 200 0];  % chosen word after the key press (fixed colour)
+p.highlight_duration = 0.3;     % s the highlighted choice stays before the blank
+p.fixation_dot      = true;     % fixation point on the image and the response screen
+p.fixation_dot_size = 8;        % px
+p.fixation_dot_color = [255 0 0];
 
 %% keys (KbName('UnifyKeyNames') names)
 % adjective option k is answered with adj_keys{k}; the word diamond places

@@ -8,7 +8,7 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 %   at display_time: image off and words on (one flip)
 %                                                 -> img_off, question
 %   arrow key (p.adj_keys)                        -> response
-%   blank screen
+%   chosen word highlighted for p.highlight_duration, then blank screen
 % naming trial
 %   microphone starts, image + photodiode on      -> img_on
 %   at display_time: soft answer tone, image stays (no text)
@@ -36,7 +36,7 @@ tex = Screen('MakeTexture', w, img);
 if is_naming, audio_collect('reset'); audio_start(hw.pa); end
 
 %% image onset
-draw_image(w, tex, dest, hw);
+draw_image(w, tex, dest, hw, p);
 res.ts_stim_on = Screen('Flip', w);
 res.ts_stim_daq = send_event(hw, ev.img_on, sprintf('img_on_%s_%s', lbl, cfg.filename), res.ts_stim_on);
 t_switch = res.ts_stim_on + p.display_time - hw.ifi / 2;    % flip at display_time
@@ -47,7 +47,7 @@ if is_naming
     if p.tone_naming
         res.ts_question = tone_play(hw.tone, res.ts_stim_on + p.display_time);
     else
-        draw_image(w, tex, dest, hw);
+        draw_image(w, tex, dest, hw, p);
         Screen('TextSize', w, p.text_size_prompt);
         DrawFormattedText(w, p.naming_prompt, 'center', dest(4) + 0.05 * H, hw.white);
         res.ts_question = Screen('Flip', w, t_switch);
@@ -100,6 +100,10 @@ else
         end
         res.ts_response_daq = send_event(hw, ev.response, sprintf('response_%s_%s', lbl, ...
             cfg.option_names{k}), t_key);
+        % feedback: the chosen word in the highlight colour, then the blank
+        draw_word_diamond(w, hw.windowRect, cfg.option_labels, hw.white, p, k);
+        t_hl = Screen('Flip', w);
+        WaitSecs('UntilTime', t_hl + p.highlight_duration);
     end
 
     Screen('FillRect', w, [0 0 0]);
@@ -125,10 +129,11 @@ res.ts_trial_end_daq = send_train(hw, ev.trial_end, res.daq_outcome_values, ['ou
 end
 
 
-function draw_image(w, tex, dest, hw)
+function draw_image(w, tex, dest, hw, p)
 % image plus the white photodiode square (white exactly while the image is on)
 Screen('DrawTexture', w, tex, [], dest);
 Screen('FillRect', w, hw.white, hw.pd_rect);
+draw_fixation_dot(w, hw.windowRect, p);
 end
 
 function rel = save_audio(hw, cfg, audio)
