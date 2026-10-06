@@ -27,5 +27,5 @@ end
 practice = plan([]);
 fprintf('--- %d trials planned (%d images x %d presentations) ---\n', numel(plan), numel(stim), p.max_reps);
 
-save(fullfile(log_dir, 'spose_plan.mat'), 'plan', 'practice', 'stim', 'p', '-v7');
+save(fullfile(log_dir, [p.file_prefix '_plan.mat']), 'plan', 'practice', 'stim', 'p', '-v7');
 end

@@ -5,7 +5,6 @@ function run_spose_dummy(patient_id, session_nr)
 %   - no eye tracker  no Titta calls, dummy Tobii file
 %   - windowed screen, sync tests skipped
 %   - test stimuli    stimuli/stimset120 (4 concepts x 4 axes x 3 steps)
-%   - an existing dummy session of the same ids is moved aside, not refused
 % The keyboard works as on the rig (local keyboard).
 % Change any value below to test other settings; names are checked against
 % functions/spose_params.m.

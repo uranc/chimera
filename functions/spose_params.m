@@ -6,6 +6,7 @@ function p = spose_params(overrides)
 %% task
 p.task_name = 'spose';
 p.task_type = TaskCodes.task('spose');
+p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS>, on every saved file
 
 %% stimuli
 p.stim_dir       = '';          % '' -> stimuli/<patient_id>/<patient_id>_<session_nr>

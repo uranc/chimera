@@ -44,6 +44,7 @@ while true
     if ~isempty(j), k = j; t_key = t_pad; break; end
     if GetSecs - t_ref >= timeout, break; end
     if ~isempty(poll_fn), poll_fn(); end
+    session_audio('fetch');           % keep the continuous recording flowing
     WaitSecs(0.001);     % small yield so this does not spin the CPU at 100%
 end
 KbQueueStop;
@@ -68,6 +69,7 @@ while GetSecs - t_ref < timeout
     j = find(new(1:end-1), 1);
     if ~isempty(j), k = j; t_key = t; return; end
     if ~isempty(poll_fn), poll_fn(); end
+    session_audio('fetch');
     WaitSecs(0.001);
 end
 end

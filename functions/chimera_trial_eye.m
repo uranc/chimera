@@ -10,12 +10,12 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 %   arrow key (p.adj_keys)                        -> response
 %   chosen word highlighted for p.highlight_duration, then blank screen
 % naming trial
-%   microphone starts, image + photodiode on      -> img_on
+%   image + photodiode on                         -> img_on
 %   at display_time: soft answer tone, image stays (no text)
 %                                                 -> question (at tone onset)
 %   p.naming_end_keys (no time limit by default)  -> response
 %   image off, blank screen                       -> img_off
-%   microphone stops, wav saved, voice onset estimated
+%   voice onset estimated from the continuous session recording
 % every trial ends with trial_end + TaskCodes.TRAIN_OUTCOME, also after F10
 % (aborted = true, response 0).
 %
@@ -33,7 +33,6 @@ is_naming = strcmp(cfg.trial_type_name, 'naming');
 
 dest = image_dest_rect(img, hw.windowRect, p.image_scale);
 tex = Screen('MakeTexture', w, img);
-if is_naming, audio_collect('reset'); audio_start(hw.pa); end
 
 %% image onset
 draw_image(w, tex, dest, hw, p);
@@ -55,7 +54,7 @@ if is_naming
     res.ts_question_daq = send_event(hw, ev.question, ['answer_cue_' lbl], res.ts_question);
 
     [k, t_key, aborted] = wait_for_keys(p.naming_end_keys, p.abort_key, p.naming_max_duration, ...
-        res.ts_question, @() audio_collect('fetch', hw.pa));
+        res.ts_question);
     if ~aborted && k > 0
         res.response_key = p.naming_end_keys{k};
         res.ts_response_daq = send_event(hw, ev.response, ['response_' lbl], t_key);
@@ -66,16 +65,13 @@ if is_naming
     res.ts_blank = res.ts_stim_off;
     res.ts_stim_off_daq = send_event(hw, ev.img_off, ['img_off_' lbl], res.ts_stim_off);
 
-    [tail_audio, t_tail, ovf_tail] = audio_stop(hw.pa);
-    rec = audio_collect('get');
-    audio = [rec.audio, tail_audio];
-    res.audio_capture_start = rec.t0;
-    if isnan(rec.t0), res.audio_capture_start = t_tail; end
-    res.audio_overflow = rec.overflow || isequal(ovf_tail, 1);
-    if ~isempty(audio)
-        res.audio_file = save_audio(hw, cfg, audio);
-        res.voice_onset = detect_voice_onset(audio, hw.fs, res.audio_capture_start, ...
-            res.ts_stim_on, p.voice_threshold);
+    % the session recording is continuous (session_audio); this trial only
+    % notes where it is in that file and estimates the voice onset
+    if session_audio('active')
+        rec = session_audio('since', res.ts_stim_on);
+        res.audio_file = hw.audio_file;
+        res.audio_capture_start = session_audio('t0');
+        res.voice_onset = detect_voice_onset(rec.audio, hw.fs, rec.t0, res.ts_stim_on, p.voice_threshold);
     end
     res.correct = TaskCodes.CORRECT.not_applicable;
 else
@@ -134,15 +130,4 @@ function draw_image(w, tex, dest, hw, p)
 Screen('DrawTexture', w, tex, [], dest);
 Screen('FillRect', w, hw.white, hw.pd_rect);
 draw_fixation_dot(w, hw.windowRect, p);
-end
-
-function rel = save_audio(hw, cfg, audio)
-d = fullfile(hw.log_dir, [cfg.task_name '_audio']);
-if ~isfolder(d), mkdir(d); end
-if cfg.is_practice
-    rel = fullfile([cfg.task_name '_audio'], sprintf('practice_%02d.wav', cfg.trial_id));
-else
-    rel = fullfile([cfg.task_name '_audio'], sprintf('trial_%04d.wav', cfg.trial_id));
-end
-audiowrite(fullfile(hw.log_dir, rel), audio', hw.fs);
 end

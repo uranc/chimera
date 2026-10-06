@@ -46,7 +46,9 @@ if isempty(stim_dir)
     stim_dir = fullfile(base_dir, 'stimuli', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
 end
 log_dir = prepare_log_dir(fullfile(base_dir, 'logs', sprintf('%d', patient_id), ...
-    sprintf('%d_%d', patient_id, session_nr)), p.task_name, p.allow_overwrite);
+    sprintf('%d_%d', patient_id, session_nr)));
+% every file of this run carries its start time, so no run can overwrite another
+p.file_prefix = sprintf('%s_%s', p.task_name, datestr(now, 'yyyymmdd_HHMMSS'));
 
 if isempty(p.rng_seed), rng('shuffle'); else, rng(p.rng_seed); end
 rng_state = rng;
@@ -62,13 +64,13 @@ stop_reason = 'plan_complete';
 
 session_cfg = struct('patient_id', patient_id, 'session_nr', session_nr, ...
     'task_name', p.task_name, 'task_type', p.task_type, 'params', p, ...
-    'stim_dir', stim_dir, 'log_dir', log_dir, 'n_images', numel(stim), ...
+    'stim_dir', stim_dir, 'log_dir', log_dir, 'file_prefix', p.file_prefix, 'n_images', numel(stim), ...
     'n_trials_planned', numel(plan), 'n_min_trials', n_min_trials, ...
     'daq_found', daq ~= 0, 'protocol_version', TaskCodes.PROTOCOL_VERSION, ...
     'protocol', TaskCodes.snapshot(), 'rng_state', rng_state, ...
-    'created', datestr(now), 'screen', [], 'audio_fs', NaN, ...
+    'created', datestr(now), 'screen', [], 'audio_fs', NaN, 'audio', [], ...
     'n_trials_run', 0, 'stop_reason', '', 'minutes_run', NaN);
-save(fullfile(log_dir, [p.task_name '_session_cfg.mat']), 'session_cfg', '-v7');
+save(fullfile(log_dir, [p.file_prefix '_session_cfg.mat']), 'session_cfg', '-v7');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% eyetracker initialization
@@ -135,7 +137,12 @@ try
     hw = struct('window', window, 'windowRect', windowRect, 'white', white, ...
         'ifi', Screen('GetFlipInterval', window), ...
         'pd_rect', photodiode_rect(windowRect, p.photodiode_size, p.photodiode_corner), ...
-        'daq', daq, 'EThndl', EThndl, 'pa', pa, 'fs', audio_fs, 'tone', tone, 'log_dir', log_dir);
+        'daq', daq, 'EThndl', EThndl, 'pa', pa, 'fs', audio_fs, 'tone', tone, 'log_dir', log_dir, 'file_prefix', p.file_prefix, ...
+        'audio_file', [p.file_prefix '_audio.wav']);
+    % continuous microphone recording of the whole session (one wav)
+    if ~isempty(pa)
+        session_audio('start', pa, audio_fs, p.mic_channels, fullfile(log_dir, hw.audio_file));
+    end
     session_cfg.screen = struct('windowRect', windowRect, 'ifi', hw.ifi, ...
         'nominal_hz', Screen('NominalFrameRate', window), 'pd_rect', hw.pd_rect);
 
@@ -281,6 +288,7 @@ catch ME
     stop_reason = ['error: ' ME.message];
     if ~exist('n_run', 'var'), n_run = 0; end
     if ~exist('minutes_run', 'var'), minutes_run = NaN; end
+    if session_audio('active'), session_cfg.audio = session_audio('stop'); end
     try
         save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_reason, minutes_run, ...
             paradigm_times_daq, paradigm_events_daq, EThndl);
@@ -294,6 +302,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% save variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if session_audio('active'), session_cfg.audio = session_audio('stop'); end
 
 fprintf('Session ended (%s) after %d trials (minimum %d), %.1f min. Saving variables....\n', ...
     stop_reason, n_run, n_min_trials, minutes_run);

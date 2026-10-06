@@ -30,6 +30,6 @@ cfg.ts_trial_daq = ts_trial_daq;
 cfg.ts_fix = ts_fix;
 cfg.ts_fix_daq = ts_fix_daq;
 cfg.blank_actual = ts_fix - blank_onset;
-save_trial(log_dir, p.task_name, cfg);
+save_trial(log_dir, p.file_prefix, cfg);
 blank_onset = res.ts_blank;
 end

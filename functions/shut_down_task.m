@@ -9,6 +9,7 @@ if ~isempty(EThndl)
         warning('shut_down_task:deInit', '%s', ME.message);
     end
 end
+if session_audio('active'), session_audio('stop'); end   % closes the wav cleanly after an error too
 audio_close(pa);
 if nargin >= 3, tone_close(tone); end
 ShowCursor;

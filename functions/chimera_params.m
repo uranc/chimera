@@ -10,6 +10,7 @@ function p = chimera_params(overrides)
 %% task
 p.task_name = 'chimera';
 p.task_type = TaskCodes.task('chimera');
+p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS>, on every saved file
 
 %% stimuli
 % '' -> stimuli/<patient_id>/<patient_id>_<session_nr> (as run_dynamic_eye)

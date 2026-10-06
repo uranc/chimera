@@ -1,7 +1,8 @@
 function save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_reason, minutes_run, ...
     paradigm_times_daq, paradigm_events_daq, EThndl)
 % SAVE_TASK_SESSION  End-of-session files in the style of run_dynamic_eye
-% (-v7, so German texts can be stored), prefixed with the task name (chimera_*, spose_*):
+% (-v7, so German texts can be stored), prefixed with p.file_prefix =
+% <task>_<yyyymmdd_HHMMSS> (chimera_20261007_101530_*, ...):
 %   <task>_session_cfg.mat           session_cfg (parameters, protocol, stop info)
 %   <task>_trials.mat                every planned trial struct (completed flags)
 %   <task>_imgOnOff.mat              image on/off times per trial
@@ -11,7 +12,7 @@ function save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run,
 %   <task>_tobii_data*.mat           Titta session data (or a dummy file)
 % Trial-wise vectors have one entry per planned trial (NaN = not run).
 % Every trial was also saved on its own right after it ran (save_trial).
-tn = p.task_name;
+tn = p.file_prefix;                 % <task>_<run start time>
 session_cfg.n_trials_run = n_run;
 session_cfg.stop_reason = stop_reason;
 session_cfg.minutes_run = minutes_run;

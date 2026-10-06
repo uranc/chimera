@@ -87,7 +87,7 @@ fprintf('--- %d trials planned (%d images x %d presentations, minimum %d trials)
 practice = make_practice(p, patient_id, session_nr, stim_dir, stim, axis_ids, axis_names);
 
 %% save everything predetermined before trial 1
-save(fullfile(log_dir, [p.task_name '_plan.mat']), 'plan', 'practice', 'stim', 'p', '-v7');
+save(fullfile(log_dir, [p.file_prefix '_plan.mat']), 'plan', 'practice', 'stim', 'p', '-v7');
 end
 
 
