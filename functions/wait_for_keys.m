@@ -52,20 +52,27 @@ end
 
 
 function [k, t_key, aborted] = poll_keys(codes, abort_code, timeout, t_ref, poll_fn)
-KbReleaseWait;
+% KbCheck polling that reacts only to NEW presses of the keys asked for:
+% keys already down on entry (or reported as permanently down, which some
+% Windows laptops do) are ignored, so no "release all keys" wait is needed.
+watch = [codes, abort_code];
+[~, ~, kc] = KbCheck;
+prev = logical(kc(watch)) | gamepad_keys_at(watch);
 k = 0; t_key = NaN; aborted = false;
-pad_prev = gamepad_keys();
 while GetSecs - t_ref < timeout
-    [down, t, kc] = KbCheck;
-    [pad, t_pad] = gamepad_keys();
-    new = pad & ~pad_prev; pad_prev = pad;
-    if any(new), kc = logical(kc) | new; down = true; t = t_pad; end
-    if down
-        if kc(abort_code), aborted = true; t_key = t; return; end
-        j = find(kc(codes), 1);
-        if ~isempty(j), k = j; t_key = t; return; end
-    end
+    [~, t, kc] = KbCheck;
+    now_down = logical(kc(watch)) | gamepad_keys_at(watch);
+    new = now_down & ~prev;
+    prev = now_down;
+    if new(end), aborted = true; t_key = t; return; end
+    j = find(new(1:end-1), 1);
+    if ~isempty(j), k = j; t_key = t; return; end
     if ~isempty(poll_fn), poll_fn(); end
     WaitSecs(0.001);
 end
+end
+
+function d = gamepad_keys_at(codes)
+pad = gamepad_keys();
+d = pad(codes);
 end

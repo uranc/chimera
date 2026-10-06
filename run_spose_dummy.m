@@ -24,7 +24,11 @@ o.window_rect     = [0 0 1280 800];
 o.skip_sync_tests = 1;
 o.allow_overwrite = true;
 o.kb_mode         = 'poll';     % KbCheck: works with keys sent over VNC
-o.dynamic_fcn_dir = '/home/uranc/Documents/dynamic/code/experiment/functions';
+% the dynamic paradigm's functions folder: first existing candidate is used
+% (add your Windows path here if it lives elsewhere)
+o.dynamic_fcn_dir = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
+                     fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
+                     '/home/uranc/Documents/dynamic/code/experiment/functions'};
 % test stimuli
 o.stim_dir       = fullfile(here, 'stimuli', 'stimset120');
 o.concept_subset = [1 4 5 8];          % lipstick, hamburger, onion, banana

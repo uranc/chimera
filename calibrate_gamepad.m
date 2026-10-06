@@ -21,10 +21,14 @@ for k = 1:numel(keys)
     fprintf('\nPress the control(s) for %s, one at a time. Then press ENTER here.\n', what{k});
     [b0, v0] = gamepad_read(dev);                   % rest state
     got = 0;
+    [~, ~, kc] = KbCheck(-1);
+    ret_prev = kc(KbName('Return'));
     while true
         [b, v] = gamepad_read(dev);
-        [down, ~, kc] = KbCheck(-1);
-        if down && kc(KbName('Return')) && got > 0, KbReleaseWait; break; end
+        [~, ~, kc] = KbCheck(-1);                 % new ENTER press only (no release-all wait)
+        ret = kc(KbName('Return'));
+        if ret && ~ret_prev && got > 0, break; end
+        ret_prev = ret;
         nb = find(b & ~b0, 1);
         na = find(abs(v - v0) > dead & abs(v) > dead, 1);
         if ~isempty(nb)

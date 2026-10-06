@@ -106,7 +106,7 @@ try
                 'center', wrect(4) - 40, white);
             Screen('Flip', win);
         end
-        KbReleaseWait;
+        wait_keys_up({'space', 'ESCAPE', 'UpArrow', 'DownArrow', 'LeftArrow', 'RightArrow'});   % only these keys (Windows laptops may report others as always down)
         results(end+1) = struct('trial', tr, 'target', target, 'path', path, 'times', times, ...
             'final', pos, 'score', score_fn(pos), 'rt', GetSecs - t0); %#ok<AGROW>
         fprintf('trial %d: target axis %d step %d | final axis %d step %d | score %.2f | %d moves\n', ...
@@ -151,4 +151,13 @@ while size(xy, 2) < n
     xy = [xy, p(:, ~inside)]; %#ok<AGROW>
 end
 xy = xy(:, 1:n);
+end
+
+function wait_keys_up(names)
+codes = KbName(names);
+while true
+    [~, ~, kc] = check_keys();
+    if ~any(kc(codes)), return; end
+    WaitSecs(0.01);
+end
 end

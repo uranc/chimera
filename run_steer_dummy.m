@@ -71,7 +71,7 @@ try
         pos = [map(1), 0];                       % (axis index, step); step 0 = original
         path = pos; times = 0;
         t0 = GetSecs; t_last = -Inf; done = false; timed_out = false;
-        KbReleaseWait;
+        wait_keys_up({'space', 'ESCAPE', 'UpArrow', 'DownArrow', 'LeftArrow', 'RightArrow'});   % only these keys (Windows laptops may report others as always down)
         while ~done
             [~, t, kc] = check_keys();      % keyboard + gamepad
             for k = 1:numel(axes_)
@@ -139,4 +139,13 @@ end
 
 function s = ternary(c, a, b)
 if c, s = a; else, s = b; end
+end
+
+function wait_keys_up(names)
+codes = KbName(names);
+while true
+    [~, ~, kc] = check_keys();
+    if ~any(kc(codes)), return; end
+    WaitSecs(0.01);
+end
 end
