@@ -38,7 +38,7 @@ ev = TaskCodes.EVENTS;                         % event codes, see functions/Task
 
 stim_dir = p.stim_dir;
 if isempty(stim_dir)
-    stim_dir = fullfile(base_dir, 'stimuli', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
+    stim_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d_stimset%02d', patient_id, session_nr));
 end
 log_dir = prepare_log_dir(fullfile(base_dir, 'logs', sprintf('%d', patient_id), ...
     sprintf('%d_%d', patient_id, session_nr)));

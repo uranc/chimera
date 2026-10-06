@@ -9,9 +9,9 @@ p.task_type = TaskCodes.task('spose');
 p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS>, on every saved file
 
 %% stimuli
-p.stim_dir       = '';          % '' -> stimuli/<patient_id>/<patient_id>_<session_nr>
-p.step_subset    = [1 2 3];     % generated morph steps (0 = original, used by the mini-screening)
-p.inst_subset    = 0;           % instance (exemplar) of each concept
+p.stim_dir       = '';          % '' -> stimuli/subject<NNN>_stimset<NN> (patient_id, session_nr)
+p.step_subset    = [1 2 3];     % levels: 1..3 generated (0 = original, used by the mini-screening)
+p.inst_subset    = 1;           % instance (exemplar) of each concept
 p.alpha_subset   = [];
 p.concept_subset = [];
 p.axis_subset    = [];

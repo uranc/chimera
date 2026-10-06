@@ -15,9 +15,9 @@ o.kb_mode         = 'poll';            % KbCheck: also works over remote desktop
 o.dynamic_fcn_dir = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                      fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                      '/home/uranc/Documents/dynamic/code/experiment/functions'};
-% example stimuli: 8 axes x 4 concepts x 3 steps (setup/make_stimset.py --random 4)
-o.stim_dir       = fullfile(here, 'stimuli', 'example_8ax_4c');
-o.practice_dir   = fullfile(here, 'stimuli', 'practice_8ax');   % 2 other concepts (owl, bell)
+% stimuli: the default folder, stimuli/subject099_stimset01 for the dummies'
+% patient 99 / session 1 (setup/make_stimset.py --subject 99 --stimset 1 ...)
+o.practice_dir   = fullfile(here, 'stimuli', 'practice');   % 2 other concepts (owl, bell)
 switch task
     case {'chimera', 'naming'}
         o.text_size_words  = 20;

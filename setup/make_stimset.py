@@ -1,81 +1,90 @@
 #!/usr/bin/env python3
-"""Build a task stimulus folder from the generated morph sequences.
+"""Build one session's stimulus folder from the generated morph sequences.
 
-Source layout (cso/_pending_stimuli_realvis_cn_preview_all12):
-    <axis-name>/c<id>_<concept>_inst<i>/f000.jpg .. f006.jpg  + dense_alphas.npy
-    f000 = original (alpha 0); f001..f006 = generated steps (alpha 0.9 .. 5.5)
-Output (what load_stimuli.m parses), copied; folders and files carry the
-ids and the words, and the morph step instead of the alpha value:
-    <out>/a<axis_id>_<axis-name>/a<axis_id>_<axis-name>_c<id>_<concept>_inst<i>_s<step>.jpg
-    step 1..3 = generated frames 2, 4, 6 (alpha 1.8, 3.7, 5.5)
-    <out>/a0_original/a0_original_c<id>_<concept>_inst<i>_s0.jpg
-    step 0 = the original photo (identical on every axis, stored once; mini-screening)
-All instances are copied (chimera picks one with inst_subset).
-<out>/steps.csv lists step, source frame and alpha.
-axis_id = the 66-d SPoSE dimension number (metallic-artificial = 1, food = 2, ...).
+Source (cso/_pending_stimuli_realvis_cn_preview_all12):
+    <axis-name>/c<things_id>_<concept>_inst<i>/f000.jpg .. f006.jpg + dense_alphas.npy
+    f000 = original (alpha 0); f001..f006 = generated (alpha 0.9 .. 5.5)
 
-Example set (4 random concepts, seeded):
-    python3 setup/make_stimset.py --random 4 --seed 1 --out stimuli/example_8ax_4c
-Patient set (the 4 screened concepts, ids from the screening):
-    python3 setup/make_stimset.py --concepts 8 14 23 54 --out stimuli/<pid>/<pid>_<sess>
+Output: ONE flat folder per session, stimuli/subject<NNN>_stimset<NN>/:
+    a<a>_<axisname>_c<c>_<conceptname>_inst<k>_level<L>.jpg
+        a = 1..8 axis index in this set, c = 1..n concept index in this set,
+        k = 1..n instance, L = 1..3 generated level (frames 2, 4, 6)
+    a0_original_c<c>_<conceptname>_inst<k>_level0.jpg
+        the original photo (identical on every axis, stored once; mini-screening)
+    stimset_map.csv   what every index stands for (SPoSE dimension, THINGS
+                      concept id, source instance, source frame, alpha)
+
+Patient session (the screened concepts, THINGS ids from the screening):
+    python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts 8 14 23 54
+    -> stimuli/subject001_stimset01/   (run_chimera_eye(1, 1) reads it by default)
+Example / test (4 random concepts, seeded):
+    python3 setup/make_stimset.py --subject 99 --stimset 1 --random 4 --seed 1
+Any other folder: --out <dir>
 """
-import argparse, os, re, shutil, sys
+import argparse, os, shutil, sys
 import numpy as np
 
 SRC = os.path.join(os.path.dirname(__file__), '..', '..', 'cso', '_pending_stimuli_realvis_cn_preview_all12')
-# 8 axes = the 8 lowest-numbered (most important) SPoSE dimensions of the 12 generated
-AXES = {1: 'metallic-artificial', 2: 'food-related', 3: 'animal-related', 5: 'plant-related',
-        6: 'house-related-furnishing-related', 9: 'body--people-related',
-        12: 'colorful-playful', 13: 'outdoors'}
-FRAMES = [2, 4, 6]          # 3 generated steps, evenly spaced, incl. the maximum (alpha 1.8, 3.7, 5.5)
+# 8 axes = the 8 lowest-numbered (most important) SPoSE dimensions of the 12 generated,
+# in that order -> a1..a8
+AXES = [(1, 'metallic-artificial'), (2, 'food-related'), (3, 'animal-related'), (5, 'plant-related'),
+        (6, 'house-related-furnishing-related'), (9, 'body--people-related'),
+        (12, 'colorful-playful'), (13, 'outdoors')]
+FRAMES = [2, 4, 6]          # levels 1..3: evenly spaced generated frames incl. the maximum
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--src', default=SRC)
-ap.add_argument('--out', required=True)
-ap.add_argument('--concepts', type=int, nargs='*', help='concept ids (default: all)')
+ap.add_argument('--out', help='output folder (default: stimuli/subject<NNN>_stimset<NN>)')
+ap.add_argument('--subject', type=int)
+ap.add_argument('--stimset', type=int)
+ap.add_argument('--concepts', type=int, nargs='*', help='THINGS concept ids (default: all)')
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
 ap.add_argument('--seed', type=int, default=1)
-ap.add_argument('--inst', type=int, nargs='*', help='instances to copy (default: all)')
-ap.add_argument('--frames', type=int, nargs='*', default=FRAMES)
+ap.add_argument('--inst', type=int, nargs='*', help='source instances to copy (default: all)')
 a = ap.parse_args()
-if a.random:
-    all_ids = sorted({int(q.split('_')[0][1:]) for q in os.listdir(os.path.join(a.src, AXES[1]))})
-    a.concepts = sorted(np.random.default_rng(a.seed).choice(all_ids, a.random, replace=False).tolist())
-    print(f'random concepts (seed {a.seed}): {a.concepts}')
+if a.out is None:
+    if a.subject is None or a.stimset is None:
+        sys.exit('give --subject and --stimset (or --out)')
+    a.out = os.path.join(os.path.dirname(__file__), '..', 'stimuli', f'subject{a.subject:03d}_stimset{a.stimset:02d}')
 
-n = 0
-step_alpha = {}
-for axis_id, axis in AXES.items():
-    adir = os.path.join(a.src, axis)
-    for seq in sorted(os.listdir(adir)):
-        stem, inst = seq.rsplit('_inst', 1)
-        cid = int(stem.split('_')[0][1:])
-        if (a.inst is not None and int(inst) not in a.inst) or (a.concepts and cid not in a.concepts):
-            continue
-        alphas = np.load(os.path.join(adir, seq, 'dense_alphas.npy'))
-        odir = os.path.join(a.out, f'a{axis_id}_{axis}')
-        os.makedirs(odir, exist_ok=True)
-        for step, f in enumerate(a.frames, start=1):
-            src = os.path.join(adir, seq, f'f{f:03d}.jpg')
-            dst = os.path.join(odir, f'a{axis_id}_{axis}_{stem}_inst{inst}_s{step}.jpg')
-            shutil.copyfile(src, dst)
-            n += 1
-            step_alpha[step] = (f, float(alphas[f]))
-        # the original (frame 0) once per concept x instance
-        orig = os.path.join(a.out, 'a0_original', f'a0_original_{stem}_inst{inst}_s0.jpg')
-        if not os.path.exists(orig):
-            os.makedirs(os.path.dirname(orig), exist_ok=True)
-            shutil.copyfile(os.path.join(adir, seq, 'f000.jpg'), orig)
-            n += 1
-            step_alpha[0] = (0, float(alphas[0]))
-with open(os.path.join(a.out, 'steps.csv'), 'w') as fh:
-    fh.write('step,source_frame,alpha\n')
-    for st in sorted(step_alpha):
-        fh.write(f'{st},{step_alpha[st][0]},{step_alpha[st][1]:.2f}\n')
+# concepts present on the first axis -> {things_id: name}
+names = {}
+for q in os.listdir(os.path.join(a.src, AXES[0][1])):
+    stem = q.rsplit('_inst', 1)[0]
+    names[int(stem.split('_')[0][1:])] = stem.split('_', 1)[1]
+if a.random:
+    a.concepts = sorted(np.random.default_rng(a.seed).choice(sorted(names), a.random, replace=False).tolist())
+    print(f'random concepts (seed {a.seed}): {a.concepts}')
+concepts = a.concepts or sorted(names)
+missing = [c for c in concepts if c not in names]
+if missing:
+    sys.exit(f'THINGS concept ids not found: {missing}')
+
+os.makedirs(a.out, exist_ok=True)
+rows, n = [], 0
+for ci, tid in enumerate(concepts, start=1):
+    cname = names[tid]
+    for ai, (dim, axis) in enumerate(AXES, start=1):
+        seqs = sorted(q for q in os.listdir(os.path.join(a.src, axis)) if q.startswith(f'c{tid}_{cname}_inst'))
+        insts = sorted(int(q.rsplit('_inst', 1)[1]) for q in seqs)
+        if a.inst is not None:
+            insts = [i for i in insts if i in a.inst]
+        for ki, src_inst in enumerate(insts, start=1):
+            sdir = os.path.join(a.src, axis, f'c{tid}_{cname}_inst{src_inst}')
+            alphas = np.load(os.path.join(sdir, 'dense_alphas.npy'))
+            for lev, f in enumerate(FRAMES, start=1):
+                fn = f'a{ai}_{axis}_c{ci}_{cname}_inst{ki}_level{lev}.jpg'
+                shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
+                rows.append((fn, ai, axis, dim, ci, cname, tid, ki, src_inst, lev, f, alphas[f]))
+                n += 1
+            orig = f'a0_original_c{ci}_{cname}_inst{ki}_level0.jpg'
+            if not os.path.exists(os.path.join(a.out, orig)):
+                shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(a.out, orig))
+                rows.append((orig, 0, 'original', 0, ci, cname, tid, ki, src_inst, 0, 0, alphas[0]))
+                n += 1
+
+with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
+    fh.write('file,axis_idx,axis_name,spose_dim,concept_idx,concept_name,things_id,inst,source_inst,level,source_frame,alpha\n')
+    for r in rows:
+        fh.write(','.join(map(str, r[:-1])) + f',{r[-1]:.2f}\n')
 print(f'{n} images -> {a.out}')
-if a.concepts:
-    found = {int(m.group(1)) for _, _, fs in os.walk(a.out) for f in fs
-             for m in [re.search(r'_c(\d+)_[^_]+_inst', f)] if m}
-    missing = sorted(set(a.concepts) - found)
-    if missing:
-        sys.exit(f'concept ids not found: {missing}')

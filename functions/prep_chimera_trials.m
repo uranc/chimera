@@ -154,7 +154,7 @@ if ~isfolder(src)
     return
 end
 cand = load_stimuli(src, [], 'PRACTICE');
-cand = cand(~ismember([cand.concept_id], [stim.concept_id]) & ismember([cand.axis_id], axis_ids));
+cand = cand(~ismember({cand.concept_name}, {stim.concept_name}) & ismember([cand.axis_id], axis_ids));   % by name: indices are per set
 if isempty(cand)
     warning('prep_chimera_trials:practice', ['no practice images (concepts outside the session ' ...
         'with the session''s axes) in %s, no practice'], src);

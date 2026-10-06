@@ -1,9 +1,10 @@
 function stim = load_stimuli(stim_dir, p, label)
 % LOAD_STIMULI  Parse the generated images in stim_dir (subfolders included).
 % File name conventions:
-%     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_s<step>.(jpg|png)
-%         step 1..3 generated, 0 = original (setup/make_stimset.py)
-%         e.g. a13_outdoors_c38_glove_inst0_s2.jpg ; level_id = step
+%     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_level<L>.(jpg|png)
+%         session sets from setup/make_stimset.py: indices within the set,
+%         level 1..3 generated, level 0 = original (a0_original_...)
+%         e.g. a8_outdoors_c1_glove_inst1_level2.jpg ; level_id = L
 %     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_a<alpha>.(jpg|png)
 %         older sets (stimset120); level_id = rank of alpha
 % Keeps images that pass p.step_subset / p.inst_subset / p.alpha_subset /
@@ -19,7 +20,7 @@ if ~isfolder(stim_dir)
 end
 
 files = [dir(fullfile(stim_dir, '**', '*.png')); dir(fullfile(stim_dir, '**', '*.jpg'))];
-pattern = '^a(\d+)_([a-zA-Z0-9\-]+)_c(\d+)_([a-zA-Z0-9\-]+)_inst(\d+)_([as])(\d+\.?\d*)\.(jpg|png)$';
+pattern = '^a(\d+)_([a-zA-Z0-9\-]+)_c(\d+)_([a-zA-Z0-9\-]+)_inst(\d+)_(level|a)(\d+\.?\d*)\.(jpg|png)$';
 
 stim = struct('stim_idx', {}, 'image_file', {}, 'filename', {}, 'axis_id', {}, 'axis_name', {}, ...
     'concept_id', {}, 'concept_name', {}, 'inst_id', {}, 'alpha', {}, 'step', {}, 'level_id', {});
@@ -33,8 +34,8 @@ for i = 1:numel(files)
         'axis_id', str2double(tok{1}), 'axis_name', tok{2}, ...
         'concept_id', str2double(tok{3}), 'concept_name', tok{4}, ...
         'inst_id', str2double(tok{5}), ...
-        'alpha', ternary(tok{6} == 'a', str2double(tok{7}), NaN), ...
-        'step', ternary(tok{6} == 's', str2double(tok{7}), NaN), ...
+        'alpha', ternary(strcmp(tok{6}, 'a'), str2double(tok{7}), NaN), ...
+        'step', ternary(strcmp(tok{6}, 'level'), str2double(tok{7}), NaN), ...
         'level_id', NaN); %#ok<AGROW>
 end
 if isempty(stim)
@@ -63,7 +64,7 @@ if ~isempty(p)
     end
 end
 
-%% level_id: generated step (s1..s3) or, for older alpha-named sets, the rank
+%% level_id: the level (level1..3) or, for older alpha-named sets, the rank
 %% of alpha among the alphas present; the incompleteness check below
 %% warns if they do not
 % level_id: the step (new sets) or the rank of alpha (older sets)
