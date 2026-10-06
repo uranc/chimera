@@ -62,7 +62,7 @@ p.word_dx           = 0.22;     % word diamond: horizontal offset (fraction of s
 p.word_dy           = 0.20;     % word diamond: vertical offset (fraction of screen height)
 p.highlight_color   = [255 200 0];  % chosen word after the key press (fixed colour)
 p.highlight_duration = 0.3;     % s the highlighted choice stays before the blank
-p.fixation_dot      = true;     % fixation point on the image and the response screen
+p.fixation_dot      = false;    % extra fixation point on the image and response screen (the pre-stimulus cross is the fixation)
 p.fixation_dot_size = 8;        % px
 p.fixation_dot_color = [255 0 0];
 
