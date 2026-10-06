@@ -16,6 +16,8 @@ p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS
 % '' -> stimuli/<patient_id>/<patient_id>_<session_nr> (as run_dynamic_eye)
 p.stim_dir       = '';
 % filters on the parsed filenames, [] = keep all
+p.step_subset    = [1 2 3];     % generated morph steps (0 = original, used by the mini-screening)
+p.inst_subset    = 0;           % instance (exemplar) of each concept
 p.alpha_subset   = [];          % e.g. [1.1 3.3 5.5] for stimset120: 3 generated steps, no original
 p.concept_subset = [];          % concept ids from the screening
 p.axis_subset    = [];          % axis ids

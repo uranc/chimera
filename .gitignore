@@ -1,7 +1,5 @@
 # data stays out of the repo
-stimuli/*
-!stimuli/example_8ax_4c/
-!stimuli/practice_8ax/
+stimuli/
 logs/
 *.asv
 *.mat

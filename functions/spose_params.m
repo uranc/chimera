@@ -10,6 +10,8 @@ p.file_prefix = '';             % set by the run script: <task>_<yyyymmdd_HHMMSS
 
 %% stimuli
 p.stim_dir       = '';          % '' -> stimuli/<patient_id>/<patient_id>_<session_nr>
+p.step_subset    = [1 2 3];     % generated morph steps (0 = original, used by the mini-screening)
+p.inst_subset    = 0;           % instance (exemplar) of each concept
 p.alpha_subset   = [];
 p.concept_subset = [];
 p.axis_subset    = [];

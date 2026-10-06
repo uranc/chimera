@@ -19,9 +19,13 @@ saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, 
   `stimuli/<pid>/<pid>_<sess>/`, logs written to `logs/<pid>/<pid>_<sess>/`.
 - The dummy scripts run exactly the rig code with the overrides in `functions/dummy_overrides.m`: no DAQ,
   no eye tracker, windowed, keyboard polling, example stimuli.
-- Stimuli: `setup/make_stimset.py` builds a task folder from the generated morphs (8 axes x 3 generated
-  steps). Included: `stimuli/example_8ax_4c` (4 random concepts) and `stimuli/practice_8ax` (2 others).
-  Patient set: `python3 setup/make_stimset.py --concepts <4 ids> --out stimuli/<pid>/<pid>_<sess>`.
+- Stimuli (not in git): `setup/make_stimset.py` builds task folders from the generated morphs:
+  8 axes (SPoSE dims 1,2,3,5,6,9,12,13), steps s1-s3 (frames 2/4/6, alpha 1.8/3.7/5.5), the
+  originals as s0 in `a0_original/`, all instances; `steps.csv` maps step -> alpha. Chimera uses
+  `step_subset = [1 2 3]`, `inst_subset = 0`.
+  Example (dummies): `python3 setup/make_stimset.py --concepts 38 41 62 78 --out stimuli/example_8ax_4c`
+  Practice (dummies): `python3 setup/make_stimset.py --concepts 10 47 --inst 0 --out stimuli/practice_8ax`
+  Patient: `python3 setup/make_stimset.py --concepts <4 ids> --out stimuli/<pid>/<pid>_<sess>`
 - Every saved file starts with `<task>_<yyyymmdd_HHMMSS>`, so runs never overwrite each other.
 - Gamepad: read by Psychtoolbox (`functions/gamepad_keys.m`); optional `calibrate_gamepad` saves a mapping.
 - The dynamic paradigm's `functions` folder must be on the path (or set `dynamic_fcn_dir`).
