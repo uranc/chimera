@@ -7,9 +7,9 @@ Source (cso/_pending_stimuli_realvis_cn_preview_all12):
 
 Output: ONE flat folder per session, stimuli/subject<NNN>_stimset<NN>/:
     a<a>_<axisname><dim>_c<c>_<conceptname><things>_inst<k>_level<L>.jpg
-        a      = axis index in this set (1..8; sent on the daq)
+        a      = axis index in this set (1..8, in SPoSE order; sent on the daq)
         dim    = SPoSE dimension number (1..66, 66-d embedding)
-        c      = concept index in this set (1..n; sent on the daq)
+        c      = concept index in this set (1..n, in THINGS order; sent on the daq)
         things = THINGS concept number (1..1854, unique_id.txt order)
         k      = source instance, L = 1..3 generated level (frames 2, 4, 6)
         e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg
@@ -66,7 +66,7 @@ for q in os.listdir(os.path.join(a.src, AXES[0][1])):
 if a.random:
     a.concepts = sorted(np.random.default_rng(a.seed).choice(sorted(names), a.random, replace=False).tolist())
     print(f'random concepts (seed {a.seed}): {a.concepts}')
-concepts = a.concepts or sorted(names)
+concepts = sorted(a.concepts or names)   # c1..cn in THINGS order (axes a1..a8 in SPoSE order)
 missing = [c for c in concepts if c not in names]
 if missing:
     sys.exit(f'THINGS numbers not among the generated concepts: {missing}')
