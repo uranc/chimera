@@ -27,7 +27,7 @@ p.exp_levels   = 3;             % generated steps per axis (the original is not 
 
 %% repetitions and stopping
 p.min_reps           = 6;       % presentations per image needed for the neural analysis (hard minimum)
-p.max_reps           = 11;      % presentations planned per image (extra ones run if time allows)
+p.max_reps           = 6;       % presentations planned per image (> min_reps: extra ones run if time allows)
 p.max_minutes        = 40;      % stop once this is exceeded AND every image has min_reps presentations
 p.pause_every_trials = 96;      % pause screen (Space = continue, F10 = end) every N trials
 p.min_image_gap      = 20;      % minimum trials between two presentations of the same image
@@ -41,7 +41,7 @@ p.use_naming    = false;
 p.naming_spread = 0.3;          % first presentations (naming) spread over this fraction of the minimum session
 p.spacing_floor = 0.7;          % repeats of an image no sooner than this fraction of the ideal spacing
                                 % (n_images trials); wins over naming_spread when they conflict
-p.catch_every   = 5;            % one catch per 5 adjective presentations of an image (0 = no catch)
+p.catch_every   = 0;            % 0 = no catch trials; N = one catch (target absent) per N adjective presentations
 p.n_options     = 4;            % adjective words per trial
 
 %% timing (s)

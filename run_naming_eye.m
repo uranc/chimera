@@ -1,8 +1,8 @@
-function run_naming_eye(patient_id, session_nr, overrides)
+function out = run_naming_eye(patient_id, session_nr, overrides)
 % RUN_NAMING_EYE  Naming block (task code 3), run after the mini-screening.
 % Same skeleton as run_chimera_eye / run_dynamic_eye and the same helpers.
 %
-%   run_naming_eye(patient_id, session_nr)             rig
+%   out = run_naming_eye(patient_id, session_nr)           rig
 %   run_naming_eye(patient_id, session_nr, overrides)  parameter overrides
 %                                                      (run_naming_dummy)
 % Parameters: functions/naming_params.m. Daq protocol: functions/TaskCodes.m.
@@ -309,5 +309,9 @@ save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_rea
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 shut_down_task(EThndl, pa, tone);
+
+% summary for run_session (all parameters are also in <file_prefix>_session_cfg.mat)
+out = struct('task', p.task_name, 'file_prefix', p.file_prefix, 'log_dir', log_dir, ...
+    'stop_reason', stop_reason, 'n_trials_run', n_run, 'minutes_run', minutes_run, 'params', p);
 
 end

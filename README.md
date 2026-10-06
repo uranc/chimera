@@ -4,6 +4,10 @@ Task scripts for the closed-loop visual paradigms, built on the skeleton of the 
 `run_dynamic_eye.m` / `run_mini_screening.m` and their helpers (`daqInit`, `daqOut`,
 `fixation_cross_eye`, Titta).
 
+Whole session: `run_session(patient_id, session_nr)` runs the tasks in order (chimera, then naming) and
+saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, code version).
+`run_session(pid, sess, 'dummy')` runs the same with the test settings of `functions/dummy_overrides.m`.
+
 | task | rig script | debug script | parameters | task code |
 |---|---|---|---|---|
 | chimera: adjective 4-way choice on generated morphs | `run_chimera_eye.m` | `run_chimera_dummy.m` | `functions/chimera_params.m` | 2 |
@@ -13,8 +17,13 @@ Task scripts for the closed-loop visual paradigms, built on the skeleton of the 
 
 - Rig: `run_chimera_eye(patient_id, session_nr)`. Stimuli are read from
   `stimuli/<pid>/<pid>_<sess>/`, logs written to `logs/<pid>/<pid>_<sess>/`.
-- The dummy scripts run exactly the rig code with overrides: no DAQ, no eye tracker,
-  windowed, test stimuli (`stimuli/stimset120`), keyboard polling for remote testing.
+- The dummy scripts run exactly the rig code with the overrides in `functions/dummy_overrides.m`: no DAQ,
+  no eye tracker, windowed, keyboard polling, example stimuli.
+- Stimuli: `setup/make_stimset.py` builds a task folder from the generated morphs (8 axes x 3 generated
+  steps). Included: `stimuli/example_8ax_4c` (4 random concepts) and `stimuli/practice_8ax` (2 others).
+  Patient set: `python3 setup/make_stimset.py --concepts <4 ids> --out stimuli/<pid>/<pid>_<sess>`.
+- Every saved file starts with `<task>_<yyyymmdd_HHMMSS>`, so runs never overwrite each other.
+- Gamepad: read by Psychtoolbox (`functions/gamepad_keys.m`); optional `calibrate_gamepad` saves a mapping.
 - The dynamic paradigm's `functions` folder must be on the path (or set `dynamic_fcn_dir`).
 - Daq protocol (event codes, data trains, decoder): `functions/TaskCodes.m`.
   Data bytes are sent as value + 1, so no byte is lost (`daqOut` sends no pulse for 0).

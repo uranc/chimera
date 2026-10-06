@@ -1,10 +1,10 @@
-function run_spose_eye(patient_id, session_nr, overrides)
+function out = run_spose_eye(patient_id, session_nr, overrides)
 % RUN_SPOSE_EYE  SPoSE control task ("could you lift it?"), built on the
 % skeleton of run_dynamic_eye.m / run_mini_screening.m and the same helpers
 % (daqInit, daqOut, fixation_cross_eye, Titta); same structure as
 % run_chimera_eye.
 %
-%   run_spose_eye(patient_id, session_nr)             rig
+%   out = run_spose_eye(patient_id, session_nr)           rig
 %   run_spose_eye(patient_id, session_nr, overrides)  parameter overrides
 %                                                     (run_spose_dummy)
 % All parameters: functions/spose_params.m. Daq protocol: functions/TaskCodes.m.
@@ -275,5 +275,9 @@ save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_rea
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 shut_down_task(EThndl, pa, []);
+
+% summary for run_session (all parameters are also in <file_prefix>_session_cfg.mat)
+out = struct('task', p.task_name, 'file_prefix', p.file_prefix, 'log_dir', log_dir, ...
+    'stop_reason', stop_reason, 'n_trials_run', n_run, 'minutes_run', minutes_run, 'params', p);
 
 end
