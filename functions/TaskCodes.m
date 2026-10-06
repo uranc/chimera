@@ -13,8 +13,10 @@ classdef TaskCodes
 %     value + 1, so values 0..254 map to 1..255 and no byte is invisible.
 %     Data bytes may coincide with event codes; a decoder knows how many
 %     bytes follow each marker (see parse_stream), so this is unambiguous.
-%   - patient/session/block/trial ids are sent mod ID_MOD; the THINGS concept
-%     number and reaction times (ms) as two base-RT_BASE digits (hi, lo).
+%   - patient/session/block/trial ids are sent mod ID_MOD; axis and concept
+%     are the indices within the stimulus set (SPoSE dim / THINGS number are in
+%     the file names and the saved cfg); reaction times (ms) as two
+%     base-RT_BASE digits (hi, lo).
 %
 % SEQUENCE ON THE DIGITAL CHANNEL
 %   session : eye (gaze on, if eye tracking)  session_start + TRAIN_SESSION
@@ -29,7 +31,7 @@ classdef TaskCodes
 % Every pulse and train is mirrored as a Tobii message "<code>_<label>".
 
     properties (Constant)
-        PROTOCOL_VERSION = 3;   % 3: concept as two bytes (THINGS numbers up to 1854)
+        PROTOCOL_VERSION = 4;   % 4: axis/concept = indices within the stimulus set (1 byte each)
 
         % task ("stim class") codes
         TASKS = struct('spose', 1, 'chimera', 2, 'naming', 3);
@@ -64,7 +66,7 @@ classdef TaskCodes
         TRAIN_SESSION = {'task_type', 'patient_id', 'session_nr', 'protocol_version'};
         TRAIN_BLOCK   = {'block_id'};
         TRAIN_TRIAL   = {'task_type', 'patient_id', 'session_nr', 'block_id', 'trial_id', ...
-                         'axis_id', 'concept_hi', 'concept_lo', 'inst_id', 'level_id', 'rep_id', ...
+                         'axis_id', 'concept_id', 'inst_id', 'level_id', 'rep_id', ...
                          'trial_type', 'target_pos', 'option_1', 'option_2', 'option_3', 'option_4'};
         TRAIN_OUTCOME = {'response', 'chosen_axis_id', 'correct', 'rt_hi', 'rt_lo', 'voice_hi', 'voice_lo'};
     end
@@ -101,10 +103,9 @@ classdef TaskCodes
             m = TaskCodes.ID_MOD;
             opts = zeros(1, 4);
             opts(1:numel(cfg.option_axis_ids)) = cfg.option_axis_ids;
-            [c_hi, c_lo] = TaskCodes.split_id(cfg.concept_id);
             values = [cfg.task_type, mod(cfg.patient_id, m), mod(cfg.session_nr, m), ...
                       mod(cfg.block_id, m), mod(cfg.trial_id, m), ...
-                      cfg.axis_id, c_hi, c_lo, cfg.inst_id, cfg.level_id, cfg.rep_id, ...
+                      cfg.axis_id, cfg.concept_id, cfg.inst_id, cfg.level_id, cfg.rep_id, ...
                       cfg.trial_type, cfg.target_pos, opts];
             TaskCodes.check_values(values, 'trial');
         end

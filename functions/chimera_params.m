@@ -19,7 +19,7 @@ p.stim_dir       = '';
 p.step_subset    = [1 2 3];     % levels: 1..3 generated (0 = original, used by the mini-screening)
 p.inst_subset    = 0;           % instance (exemplar) of each concept (source instance number)
 p.alpha_subset   = [];          % e.g. [1.1 3.3 5.5] for stimset120: 3 generated steps, no original
-p.concept_subset = [];          % THINGS concept numbers from the screening
+p.concept_subset = [];          % concept indices in the stimulus set (c<n>), [] = all
 p.axis_subset    = [];          % axis ids
 % expected inventory (checked after filtering; a mismatch asks for confirmation)
 p.exp_concepts = 4;

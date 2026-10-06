@@ -20,10 +20,11 @@ saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, 
 - The dummy scripts run exactly the rig code with the overrides in `functions/dummy_overrides.m`: no DAQ,
   no eye tracker, windowed, keyboard polling, example stimuli.
 - Stimuli (not in git): `setup/make_stimset.py` builds one flat folder per session,
-  `stimuli/subject<NNN>_stimset<NN>/`, with `a<dim>_<axis>_c<things>_<concept>_inst<k>_level<L>.jpg`
-  (dim = SPoSE dimension of the 66-d embedding, things = THINGS concept number 1-1854, k = source
-  instance, levels 1-3 generated) and `a0_original_c<things>_<concept>_inst<k>_level0.jpg`
-  (originals, for the mini-screening). `stimset_map.csv` lists source frame and alpha per file.
+  `stimuli/subject<NNN>_stimset<NN>/`, with `a<a>_<axis><dim>_c<c>_<concept><things>_inst<k>_level<L>.jpg`,
+  e.g. `a8_outdoors13_c1_glove681_inst0_level2.jpg`: a, c = indices in the set (sent on the daq),
+  dim = SPoSE dimension (66-d), things = THINGS number (1-1854), k = source instance, levels 1-3
+  generated; originals as `a0_original0_c<c>_<concept><things>_inst<k>_level0.jpg` (mini-screening).
+  `stimset_map.csv` lists source frame and alpha per file.
   Chimera uses `step_subset = [1 2 3]` (levels) and `inst_subset = 0`.
   One flat folder per session: `stimuli/subject<NNN>_stimset<NN>/` (read by default for patient NNN, session NN).
   Patient: `python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts <THINGS numbers>`

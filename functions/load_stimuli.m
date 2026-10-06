@@ -1,11 +1,11 @@
 function stim = load_stimuli(stim_dir, p, label)
 % LOAD_STIMULI  Parse the generated images in stim_dir (subfolders included).
 % File name conventions:
-%     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_level<L>.(jpg|png)
-%         session sets from setup/make_stimset.py: axis = SPoSE dimension
-%         (66-d), concept = THINGS number (1..1854), source instance; level 1..3
-%         generated, level 0 = original (a0_original_...)
-%         e.g. a13_outdoors_c681_glove_inst0_level2.jpg ; level_id = L
+%     a<a>_<axisname><dim>_c<c>_<conceptname><things>_inst<k>_level<L>.(jpg|png)
+%         session sets from setup/make_stimset.py: a, c = indices in the set
+%         (axis_id, concept_id; sent on the daq), dim = SPoSE dimension,
+%         things = THINGS number, k = source instance, level 1..3 generated,
+%         0 = original (a0_original0_...); e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg
 %     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_a<alpha>.(jpg|png)
 %         older sets (stimset120); level_id = rank of alpha
 % Keeps images that pass p.step_subset / p.inst_subset / p.alpha_subset /
@@ -21,10 +21,13 @@ if ~isfolder(stim_dir)
 end
 
 files = [dir(fullfile(stim_dir, '**', '*.png')); dir(fullfile(stim_dir, '**', '*.jpg'))];
-pattern = '^a(\d+)_([a-zA-Z0-9\-]+)_c(\d+)_([a-zA-Z0-9\-]+)_inst(\d+)_(level|a)(\d+\.?\d*)\.(jpg|png)$';
+pattern = '^a(\d+)_([a-zA-Z0-9\-]*?[a-zA-Z\-])(\d*)_c(\d+)_([a-zA-Z0-9\-]*?[a-zA-Z\-])(\d*)_inst(\d+)_(level|a)(\d+\.?\d*)\.(jpg|png)$';
+% tokens: 1 axis, 2 axis name, 3 SPoSE dim, 4 concept, 5 concept name, 6 THINGS number,
+%         7 instance, 8 'level' | 'a', 9 level or alpha (older sets: 3 and 6 empty)
 
 stim = struct('stim_idx', {}, 'image_file', {}, 'filename', {}, 'axis_id', {}, 'axis_name', {}, ...
-    'concept_id', {}, 'concept_name', {}, 'inst_id', {}, 'alpha', {}, 'step', {}, 'level_id', {});
+    'spose_dim', {}, 'concept_id', {}, 'concept_name', {}, 'things_id', {}, ...
+    'inst_id', {}, 'alpha', {}, 'step', {}, 'level_id', {});
 for i = 1:numel(files)
     tok = regexp(files(i).name, pattern, 'tokens', 'once');
     if isempty(tok), continue; end
@@ -32,11 +35,11 @@ for i = 1:numel(files)
         'stim_idx', NaN, ...
         'image_file', fullfile(files(i).folder, files(i).name), ...
         'filename', files(i).name, ...
-        'axis_id', str2double(tok{1}), 'axis_name', tok{2}, ...
-        'concept_id', str2double(tok{3}), 'concept_name', tok{4}, ...
-        'inst_id', str2double(tok{5}), ...
-        'alpha', ternary(strcmp(tok{6}, 'a'), str2double(tok{7}), NaN), ...
-        'step', ternary(strcmp(tok{6}, 'level'), str2double(tok{7}), NaN), ...
+        'axis_id', str2double(tok{1}), 'axis_name', tok{2}, 'spose_dim', num_or_nan(tok{3}), ...
+        'concept_id', str2double(tok{4}), 'concept_name', tok{5}, 'things_id', num_or_nan(tok{6}), ...
+        'inst_id', str2double(tok{7}), ...
+        'alpha', ternary(strcmp(tok{8}, 'a'), str2double(tok{9}), NaN), ...
+        'step', ternary(strcmp(tok{8}, 'level'), str2double(tok{9}), NaN), ...
         'level_id', NaN); %#ok<AGROW>
 end
 if isempty(stim)
@@ -114,4 +117,8 @@ end
 
 function v = ternary(c, a, b)
 if c, v = a; else, v = b; end
+end
+
+function v = num_or_nan(t)
+if isempty(t), v = NaN; else, v = str2double(t); end
 end

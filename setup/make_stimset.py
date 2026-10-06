@@ -6,13 +6,17 @@ Source (cso/_pending_stimuli_realvis_cn_preview_all12):
     f000 = original (alpha 0); f001..f006 = generated (alpha 0.9 .. 5.5)
 
 Output: ONE flat folder per session, stimuli/subject<NNN>_stimset<NN>/:
-    a<dim>_<axisname>_c<things>_<conceptname>_inst<k>_level<L>.jpg
+    a<a>_<axisname><dim>_c<c>_<conceptname><things>_inst<k>_level<L>.jpg
+        a      = axis index in this set (1..8; sent on the daq)
         dim    = SPoSE dimension number (1..66, 66-d embedding)
+        c      = concept index in this set (1..n; sent on the daq)
         things = THINGS concept number (1..1854, unique_id.txt order)
         k      = source instance, L = 1..3 generated level (frames 2, 4, 6)
-    a0_original_c<things>_<conceptname>_inst<k>_level0.jpg
+        e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg
+    a0_original0_c<c>_<conceptname><things>_inst<k>_level0.jpg
         the original photo (identical on every axis, stored once; mini-screening)
-    stimset_map.csv   per file: SPoSE dim, THINGS number, instance, source frame, alpha
+    stimset_map.csv   per file: indices, SPoSE dim, THINGS number, instance, frame, alpha
+Concept names must not end in a digit (the THINGS number follows directly).
 
 Patient session (THINGS numbers of the screened concepts):
     python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts 681 887 344 575
@@ -69,9 +73,12 @@ if missing:
 
 os.makedirs(a.out, exist_ok=True)
 rows, n = [], 0
-for tid in concepts:
+bad = [names[t] for t in concepts if names[t][-1].isdigit()]
+if bad:
+    sys.exit(f'concept names ending in a digit would be ambiguous in the file name: {bad}')
+for ci, tid in enumerate(concepts, start=1):
     cname = names[tid]
-    for dim, axis in AXES:
+    for ai, (dim, axis) in enumerate(AXES, start=1):
         seqs = sorted(q for q in os.listdir(os.path.join(a.src, axis)) if q.startswith(f'{src_stem[tid]}_inst'))
         insts = sorted(int(q.rsplit('_inst', 1)[1]) for q in seqs)
         if a.inst is not None:
@@ -80,18 +87,18 @@ for tid in concepts:
             sdir = os.path.join(a.src, axis, f'{src_stem[tid]}_inst{src_inst}')
             alphas = np.load(os.path.join(sdir, 'dense_alphas.npy'))
             for lev, f in enumerate(FRAMES, start=1):
-                fn = f'a{dim}_{axis}_c{tid}_{cname}_inst{src_inst}_level{lev}.jpg'
+                fn = f'a{ai}_{axis}{dim}_c{ci}_{cname}{tid}_inst{src_inst}_level{lev}.jpg'
                 shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
-                rows.append((fn, dim, axis, tid, cname, src_inst, lev, f, alphas[f]))
+                rows.append((fn, ai, axis, dim, ci, cname, tid, src_inst, lev, f, alphas[f]))
                 n += 1
-            orig = f'a0_original_c{tid}_{cname}_inst{src_inst}_level0.jpg'
+            orig = f'a0_original0_c{ci}_{cname}{tid}_inst{src_inst}_level0.jpg'
             if not os.path.exists(os.path.join(a.out, orig)):
                 shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(a.out, orig))
-                rows.append((orig, 0, 'original', tid, cname, src_inst, 0, 0, alphas[0]))
+                rows.append((orig, 0, 'original', 0, ci, cname, tid, src_inst, 0, 0, alphas[0]))
                 n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
-    fh.write('file,spose_dim,axis_name,things_id,concept_name,inst,level,source_frame,alpha\n')
+    fh.write('file,axis_idx,axis_name,spose_dim,concept_idx,concept_name,things_id,inst,level,source_frame,alpha\n')
     for r in rows:
         fh.write(','.join(map(str, r[:-1])) + f',{r[-1]:.2f}\n')
 print(f'{n} images -> {a.out}')
