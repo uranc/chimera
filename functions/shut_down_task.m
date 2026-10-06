@@ -1,4 +1,4 @@
-function shut_down_task(EThndl, pa)
+function shut_down_task(EThndl, pa, tone)
 % SHUT_DOWN_TASK  Release Tobii, microphone, cursor and screen (end of
 % run_dynamic_eye, plus the microphone and ShowCursor). Safe to call after
 % an error.
@@ -10,6 +10,7 @@ if ~isempty(EThndl)
     end
 end
 audio_close(pa);
+if nargin >= 3, tone_close(tone); end
 ShowCursor;
 Screen('CloseAll');
 end

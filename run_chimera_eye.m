@@ -89,11 +89,12 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% microphone initialization (naming trials)
+%% microphone and answer tone initialization (naming trials)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [pa, audio_fs] = audio_open(p);
 session_cfg.audio_fs = audio_fs;
+tone = tone_open(p);                           % answer tone (sync pulse at its onset)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PARADIGM START
@@ -134,7 +135,7 @@ try
     hw = struct('window', window, 'windowRect', windowRect, 'white', white, ...
         'ifi', Screen('GetFlipInterval', window), ...
         'pd_rect', photodiode_rect(windowRect, p.photodiode_size, p.photodiode_corner), ...
-        'daq', daq, 'EThndl', EThndl, 'pa', pa, 'fs', audio_fs, 'log_dir', log_dir);
+        'daq', daq, 'EThndl', EThndl, 'pa', pa, 'fs', audio_fs, 'tone', tone, 'log_dir', log_dir);
     session_cfg.screen = struct('windowRect', windowRect, 'ifi', hw.ifi, ...
         'nominal_hz', Screen('NominalFrameRate', window), 'pd_rect', hw.pd_rect);
 
@@ -286,7 +287,7 @@ catch ME
     catch ME_save
         warning('run_chimera_eye:save', 'saving after the error failed too: %s', ME_save.message);
     end
-    shut_down_task(EThndl, pa);
+    shut_down_task(EThndl, pa, tone);
     rethrow(ME);
 end
 
@@ -303,6 +304,6 @@ save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_rea
 %% shut down
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-shut_down_task(EThndl, pa);
+shut_down_task(EThndl, pa, tone);
 
 end

@@ -50,7 +50,7 @@ p.blank_duration      = 0.1;    % fixed blank after each trial (added to the jit
 p.fixation_duration   = 0.3;
 p.display_time        = 1.5;    % image alone; adjective trials: image off at this time, words on
 p.response_timeout    = Inf;    % adjective trials: words stay until a key (Inf = no limit)
-p.naming_max_duration = 8;      % naming trials: max time from prompt onset to trial end
+p.naming_max_duration = Inf;    % naming trials: wait for the key (Inf = no time limit)
 
 %% display
 p.image_scale       = 0.7;      % image height as a fraction of the screen height
@@ -78,8 +78,18 @@ p.n_practice_adj    = 3;
 p.use_microphone    = false;     % only needed with use_naming
 p.mic_device        = [];       % [] = default capture device
 p.mic_channels      = 1;
-p.audio_buffer_secs = 30;       % must exceed display_time + naming_max_duration + ~1 s
+p.audio_buffer_secs = 30;       % capture buffer; emptied continuously while waiting for the key
 p.voice_threshold   = 0.1;      % amplitude for the online voice-onset estimate (offline analysis recomputes)
+
+%% answer tone: soft beep when it is time to answer; its onset is sent to the
+%% daq as the question pulse (sync). Naming trials: replaces the written prompt.
+p.use_tone       = true;
+p.tone_naming    = true;        % naming trials: tone at display_time, no text
+p.tone_adjective = false;       % adjective trials: also beep when the words appear
+p.tone_freq      = 750;         % Hz
+p.tone_dur       = 0.12;        % s
+p.tone_volume    = 0.2;         % 0..1
+p.tone_device    = [];          % [] = default playback device
 
 %% texts (German, patient facing)
 p.instructions = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ...
@@ -89,9 +99,9 @@ p.instructions = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ..
     'Drücken Sie zum Starten die Leertaste.'];
 p.instructions_naming = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ...
     'Schauen Sie zuerst auf das Kreuz in der Mitte des Bildschirms.\n\n' ...
-    'Bei manchen Bildern erscheint danach eine Aufforderung unter dem Bild:\n' ...
+    'Bei manchen Bildern hören Sie einen kurzen Ton, das Bild bleibt stehen:\n' ...
     'Nennen Sie dann laut das Objekt, oder beschreiben Sie, was Sie sehen.\n' ...
-    'Drücken Sie die Leertaste, wenn Sie fertig sind.\n\n' ...
+    'Drücken Sie eine Taste, wenn Sie fertig sind.\n\n' ...
     'Bei den anderen Bildern verschwindet das Bild, und es erscheinen vier Wörter.\n' ...
     'Wählen Sie mit den Pfeiltasten das Wort, das am besten zum Bild passt.\n\n' ...
     'Drücken Sie zum Starten die Leertaste.'];   % used when use_naming = true
@@ -134,7 +144,7 @@ end
 if p.naming_spread < 0 || p.naming_spread > 1
     error('chimera_params:spread', 'naming_spread must be in [0, 1]');
 end
-if p.audio_buffer_secs < p.display_time + p.naming_max_duration + 1
-    error('chimera_params:audio', 'audio_buffer_secs too short for display_time + naming_max_duration');
+if p.audio_buffer_secs < 5
+    error('chimera_params:audio', 'audio_buffer_secs should be at least 5 s');
 end
 end

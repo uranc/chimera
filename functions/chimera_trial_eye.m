@@ -11,9 +11,9 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 %   blank screen
 % naming trial
 %   microphone starts, image + photodiode on      -> img_on
-%   at display_time: prompt appears under the image, image stays
-%                                                 -> question
-%   p.naming_end_keys or p.naming_max_duration    -> response (key only)
+%   at display_time: soft answer tone, image stays (no text)
+%                                                 -> question (at tone onset)
+%   p.naming_end_keys (no time limit by default)  -> response
 %   image off, blank screen                       -> img_off
 %   microphone stops, wav saved, voice onset estimated
 % every trial ends with trial_end + TaskCodes.TRAIN_OUTCOME, also after F10
@@ -21,7 +21,7 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 %
 % cfg : one trial of the plan (prep_chimera_trials)
 % img : image matrix (read by the run script before the fixation cross)
-% hw  : window, windowRect, white, ifi, pd_rect, daq, EThndl, pa, fs, log_dir
+% hw  : window, windowRect, white, ifi, pd_rect, daq, EThndl, pa, fs, tone, log_dir
 % res : empty_trial_results() filled with time stamps and the response
 
 res = empty_trial_results();
@@ -33,7 +33,7 @@ is_naming = strcmp(cfg.trial_type_name, 'naming');
 
 dest = image_dest_rect(img, hw.windowRect, p.image_scale);
 tex = Screen('MakeTexture', w, img);
-if is_naming, audio_start(hw.pa); end
+if is_naming, audio_collect('reset'); audio_start(hw.pa); end
 
 %% image onset
 draw_image(w, tex, dest, hw);
@@ -42,14 +42,20 @@ res.ts_stim_daq = send_event(hw, ev.img_on, sprintf('img_on_%s_%s', lbl, cfg.fil
 t_switch = res.ts_stim_on + p.display_time - hw.ifi / 2;    % flip at display_time
 
 if is_naming
-    %% prompt under the image, image stays until the spoken response ends
-    draw_image(w, tex, dest, hw);
-    Screen('TextSize', w, p.text_size_prompt);
-    DrawFormattedText(w, p.naming_prompt, 'center', dest(4) + 0.05 * H, hw.white);
-    res.ts_question = Screen('Flip', w, t_switch);
-    res.ts_question_daq = send_event(hw, ev.question, ['naming_prompt_' lbl], res.ts_question);
+    %% answer cue at display_time: soft tone (or the written prompt if
+    %% tone_naming is off); the image stays until the spoken response ends
+    if p.tone_naming
+        res.ts_question = tone_play(hw.tone, res.ts_stim_on + p.display_time);
+    else
+        draw_image(w, tex, dest, hw);
+        Screen('TextSize', w, p.text_size_prompt);
+        DrawFormattedText(w, p.naming_prompt, 'center', dest(4) + 0.05 * H, hw.white);
+        res.ts_question = Screen('Flip', w, t_switch);
+    end
+    res.ts_question_daq = send_event(hw, ev.question, ['answer_cue_' lbl], res.ts_question);
 
-    [k, t_key, aborted] = wait_for_keys(p.naming_end_keys, p.abort_key, p.naming_max_duration, res.ts_question);
+    [k, t_key, aborted] = wait_for_keys(p.naming_end_keys, p.abort_key, p.naming_max_duration, ...
+        res.ts_question, @() audio_collect('fetch', hw.pa));
     if ~aborted && k > 0
         res.response_key = p.naming_end_keys{k};
         res.ts_response_daq = send_event(hw, ev.response, ['response_' lbl], t_key);
@@ -60,7 +66,12 @@ if is_naming
     res.ts_blank = res.ts_stim_off;
     res.ts_stim_off_daq = send_event(hw, ev.img_off, ['img_off_' lbl], res.ts_stim_off);
 
-    [audio, res.audio_capture_start, res.audio_overflow] = audio_stop(hw.pa);
+    [tail_audio, t_tail, ovf_tail] = audio_stop(hw.pa);
+    rec = audio_collect('get');
+    audio = [rec.audio, tail_audio];
+    res.audio_capture_start = rec.t0;
+    if isnan(rec.t0), res.audio_capture_start = t_tail; end
+    res.audio_overflow = rec.overflow || isequal(ovf_tail, 1);
     if ~isempty(audio)
         res.audio_file = save_audio(hw, cfg, audio);
         res.voice_onset = detect_voice_onset(audio, hw.fs, res.audio_capture_start, ...
@@ -72,6 +83,7 @@ else
     draw_word_diamond(w, hw.windowRect, cfg.option_labels, hw.white, p);
     res.ts_stim_off = Screen('Flip', w, t_switch);
     res.ts_question = res.ts_stim_off;
+    if p.tone_adjective, tone_play(hw.tone, GetSecs); end
     res.ts_stim_off_daq = send_event(hw, ev.img_off, ['img_off_' lbl], res.ts_stim_off);
     res.ts_question_daq = send_event(hw, ev.question, sprintf('words_%s_%s', lbl, ...
         strjoin(cfg.option_names, '-')), res.ts_question);
