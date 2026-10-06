@@ -20,15 +20,15 @@ saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, 
 - The dummy scripts run exactly the rig code with the overrides in `functions/dummy_overrides.m`: no DAQ,
   no eye tracker, windowed, keyboard polling, example stimuli.
 - Stimuli (not in git): `setup/make_stimset.py` builds one flat folder per session,
-  `stimuli/subject<NNN>_stimset<NN>/`, with `a<a>_<axis>_c<c>_<concept>_inst<k>_level<L>.jpg`
-  (indices within the set: 8 axes, the session's concepts, all instances, levels 1-3 generated)
-  and `a0_original_c<c>_<concept>_inst<k>_level0.jpg` (originals, for the mini-screening).
-  `stimset_map.csv` maps every index to SPoSE dimension, THINGS id, source instance and alpha.
-  Chimera uses `step_subset = [1 2 3]` (levels) and `inst_subset = 1`.
+  `stimuli/subject<NNN>_stimset<NN>/`, with `a<dim>_<axis>_c<things>_<concept>_inst<k>_level<L>.jpg`
+  (dim = SPoSE dimension of the 66-d embedding, things = THINGS concept number 1-1854, k = source
+  instance, levels 1-3 generated) and `a0_original_c<things>_<concept>_inst<k>_level0.jpg`
+  (originals, for the mini-screening). `stimset_map.csv` lists source frame and alpha per file.
+  Chimera uses `step_subset = [1 2 3]` (levels) and `inst_subset = 0`.
   One flat folder per session: `stimuli/subject<NNN>_stimset<NN>/` (read by default for patient NNN, session NN).
-  Patient: `python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts <4 ids>`
-  Example (dummies, patient 99): `python3 setup/make_stimset.py --subject 99 --stimset 1 --concepts 38 41 62 78`
-  Practice (dummies): `python3 setup/make_stimset.py --concepts 10 47 --inst 0 --out stimuli/practice`
+  Patient: `python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts <THINGS numbers>`
+  Example (dummies, patient 99): `python3 setup/make_stimset.py --subject 99 --stimset 1 --concepts 681 887 344 575`
+  Practice (dummies): `python3 setup/make_stimset.py --concepts 1092 117 --inst 0 --out stimuli/practice`
 - Every saved file starts with `<task>_<yyyymmdd_HHMMSS>`, so runs never overwrite each other.
 - Gamepad: read by Psychtoolbox (`functions/gamepad_keys.m`); optional `calibrate_gamepad` saves a mapping.
 - The dynamic paradigm's `functions` folder must be on the path (or set `dynamic_fcn_dir`).

@@ -2,9 +2,10 @@ function stim = load_stimuli(stim_dir, p, label)
 % LOAD_STIMULI  Parse the generated images in stim_dir (subfolders included).
 % File name conventions:
 %     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_level<L>.(jpg|png)
-%         session sets from setup/make_stimset.py: indices within the set,
-%         level 1..3 generated, level 0 = original (a0_original_...)
-%         e.g. a8_outdoors_c1_glove_inst1_level2.jpg ; level_id = L
+%         session sets from setup/make_stimset.py: axis = SPoSE dimension
+%         (66-d), concept = THINGS number (1..1854), source instance; level 1..3
+%         generated, level 0 = original (a0_original_...)
+%         e.g. a13_outdoors_c681_glove_inst0_level2.jpg ; level_id = L
 %     a<axis>_<axisname>_c<concept>_<conceptname>_inst<i>_a<alpha>.(jpg|png)
 %         older sets (stimset120); level_id = rank of alpha
 % Keeps images that pass p.step_subset / p.inst_subset / p.alpha_subset /
