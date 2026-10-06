@@ -4,7 +4,7 @@ function [pa, fs] = audio_open(p)
 % Returns pa = [] if p.use_microphone is false or the device cannot be
 % opened; the experimenter then confirms that naming trials run unrecorded.
 pa = []; fs = NaN;
-if ~p.use_microphone, return; end
+if ~p.use_microphone || ~p.use_naming, return; end   % only naming trials record
 try
     InitializePsychSound(1);
     pa = PsychPortAudio('Open', p.mic_device, 2, 1, [], p.mic_channels);

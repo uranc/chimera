@@ -6,7 +6,9 @@ function tone = tone_open(p)
 % Returns [] if p.use_tone is false or no playback device opens (the trial
 % then runs silently and the pulse is sent at the planned time).
 tone = [];
-if ~p.use_tone, return; end
+% only if a trial type plays it (naming trials with tone_naming, or tone_adjective)
+needed = p.use_tone && ((p.use_naming && p.tone_naming) || p.tone_adjective);
+if ~needed, return; end
 try
     InitializePsychSound(1);
     pah = PsychPortAudio('Open', p.tone_device, 1, 1, [], 2);
