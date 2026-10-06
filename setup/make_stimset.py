@@ -106,7 +106,7 @@ for ci, tid in enumerate(concepts, start=1):
                     os.makedirs(orig_dir, exist_ok=True)
                     shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
                     rows.append(('../originals/' + orig, 0, 'original', 0, ci, cname, tid, src_inst, 0, 0, alphas[0]))
-                n += 1
+                    n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
     fh.write('file,axis_idx,axis_name,spose_dim,concept_idx,concept_name,things_id,inst,level,source_frame,alpha\n')
