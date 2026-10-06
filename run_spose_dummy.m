@@ -21,7 +21,6 @@ o.use_eyetracking = false;
 o.windowed_mode   = true;
 o.window_rect     = [0 0 1280 800];
 o.skip_sync_tests = 1;
-o.allow_overwrite = true;
 o.kb_mode         = 'poll';     % KbCheck: works with keys sent over VNC
 % the dynamic paradigm's functions folder: first existing candidate is used
 % (add your Windows path here if it lives elsewhere)

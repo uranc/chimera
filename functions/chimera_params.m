@@ -123,7 +123,7 @@ p.which_screen    = 0;
 p.windowed_mode   = false;
 p.window_rect     = [0 0 800 600];
 p.skip_sync_tests = 0;
-p.allow_overwrite = false;      % refuse to overwrite an existing chimera session folder
+
 p.dynamic_fcn_dir = '';         % folder with daqInit/daqOut/fixation_cross_eye if not on the path
 p.rng_seed        = [];         % [] = seed from the clock (the seed is saved either way)
 p.kb_mode         = 'queue';    % 'queue' (KbQueue, rig) | 'poll' (KbCheck, remote test over VNC)

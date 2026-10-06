@@ -63,7 +63,6 @@ p.which_screen    = 0;
 p.windowed_mode   = false;
 p.window_rect     = [0 0 800 600];
 p.skip_sync_tests = 0;
-p.allow_overwrite = false;
 p.dynamic_fcn_dir = '';
 p.rng_seed        = [];
 p.kb_mode         = 'queue';    % 'queue' (KbQueue, rig) | 'poll' (KbCheck, remote test over VNC)
