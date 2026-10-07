@@ -8,16 +8,30 @@
 %% settings
 patient_id = 99;
 session_nr = 1;
-test_mode  = true;     % true: the test settings of run_<task>_dummy.m (no DAQ /
-                       %       eye tracker, windowed, keyboard polling); false: rig
+test_mode  = true;     % true: the test settings below; false: rig
 
 % stimuli: stimuli/subject<NNN>/subject<NNN>_stimset<NN>/ and .../practice/
 % (built with setup/make_stimset.py); override here only if needed, e.g.
 % overrides.stim_dir = 'D:\stimuli\subject001\subject001_stimset01';
 overrides = struct();
 
-%% setup (no need to edit)
+% test settings (used when test_mode = true; same as in the run_*_dummy scripts)
 here = fileparts(mfilename('fullpath'));
+if isempty(here), here = pwd; end     % section run with Ctrl+Enter: run from the ptb folder
+test = struct();
+test.use_daq          = false;         % daqOut only prints the bytes
+test.use_eyetracking  = false;         % no Titta, dummy Tobii file
+test.windowed_mode    = true;
+test.window_rect      = [0 0 640 480];
+test.skip_sync_tests  = 1;
+test.kb_mode          = 'poll';        % KbCheck: also works over remote desktop
+test.dynamic_fcn_dir  = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
+                         fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
+                         '/home/uranc/Documents/dynamic/code/experiment/functions'};
+test.text_size_words  = 20;
+test.text_size_prompt = 16;
+
+%% setup (no need to edit)
 addpath(genpath(fullfile(here, 'functions')));
 log_dir = fullfile(here, 'logs', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
 if ~isfolder(log_dir), mkdir(log_dir); end
@@ -29,7 +43,7 @@ record_file = fullfile(log_dir, sprintf('session_%s.mat', datestr(now, 'yyyymmdd
 
 %% task 1: chimera (adjective 4AFC, 96 images x 6)
 o = overrides;
-if test_mode, o = apply_test_overrides(run_chimera_dummy('overrides'), o); end
+if test_mode, o = apply_test_overrides(test, o); end
 session_record.results.chimera = run_chimera_eye(patient_id, session_nr, o);
 save(record_file, 'session_record', '-v7');
 
@@ -37,7 +51,7 @@ save(record_file, 'session_record', '-v7');
 
 %% task 3: naming (image stays on, spoken answer recorded)
 o = overrides;
-if test_mode, o = apply_test_overrides(run_naming_dummy('overrides'), o); end
+if test_mode, o = apply_test_overrides(test, o); end
 session_record.results.naming = run_naming_eye(patient_id, session_nr, o);
 save(record_file, 'session_record', '-v7');
 

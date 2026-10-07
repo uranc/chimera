@@ -1,15 +1,15 @@
-function out = run_chimera_dummy(patient_id, session_nr)
 % RUN_CHIMERA_DUMMY  Test run of the chimera task: exactly the rig code
-% (run_chimera_eye) with the test settings below. Every value here overrides
-% the default in functions/chimera_params.m (unknown names are an error).
-%   run_chimera_dummy                 patient 99, session 1
-%   run_chimera_dummy(pid, sess)
-%   o = run_chimera_dummy('overrides')   only return the settings (run_session test mode)
+% (run_chimera_eye) with the test settings below. Every o.<name> overrides the
+% default in functions/chimera_params.m (unknown names are an error).
+
+%% settings
+patient_id = 99;
+session_nr = 1;
 
 here = fileparts(mfilename('fullpath'));
+if isempty(here), here = pwd; end     % section run with Ctrl+Enter: run from the ptb folder
 addpath(genpath(fullfile(here, 'functions')));
 
-%% test settings
 o = struct();
 % hardware off
 o.use_daq          = false;         % daqOut only prints the bytes
@@ -23,18 +23,11 @@ o.kb_mode          = 'poll';        % KbCheck: also works over remote desktop
 o.dynamic_fcn_dir  = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                       fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                       '/home/uranc/Documents/dynamic/code/experiment/functions'};
-% display and stimuli (stimuli/subject099/subject099_stimset01 is the default
-% folder for patient 99, session 1)
+% display and stimuli (stimuli/subject<NNN>/subject<NNN>_stimset<NN> is read
+% by default)
 o.text_size_words  = 20;          % smaller text for the small window
 o.text_size_prompt = 16;
-o.practice_dir     = fullfile(here, 'stimuli', 'subject099', 'practice');
+o.practice_dir     = fullfile(here, 'stimuli', sprintf('subject%03d', patient_id), 'practice');
 
 %% run
-if nargin >= 1 && ischar(patient_id) && strcmp(patient_id, 'overrides')
-    out = o;
-    return
-end
-if nargin < 1, patient_id = 99; end
-if nargin < 2, session_nr = 1; end
-out = run_chimera_eye(patient_id, session_nr, o);
-end
+result_chimera = run_chimera_eye(patient_id, session_nr, o);
