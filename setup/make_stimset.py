@@ -53,6 +53,7 @@ ap.add_argument('--practice', action='store_true', help='write the subject pract
 ap.add_argument('--concepts', type=int, nargs='*', help='THINGS concept numbers (default: all available)')
 ap.add_argument('--things', default=THINGS_IDS, help='THINGS unique_id.txt (concept order)')
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
+ap.add_argument('--frames', type=int, nargs='*', default=FRAMES, help='generated frames used as levels 1..n (default 2 4 6)')
 ap.add_argument('--seed', type=int, default=1)
 ap.add_argument('--inst', type=int, nargs='*', help='source instances to copy (default: all)')
 a = ap.parse_args()
@@ -99,7 +100,7 @@ for ci, tid in enumerate(concepts, start=1):
         for src_inst in insts:
             sdir = os.path.join(a.src, axis, f'{src_stem[tid]}_inst{src_inst}')
             alphas = np.load(os.path.join(sdir, 'dense_alphas.npy'))
-            for lev, f in enumerate(FRAMES, start=1):
+            for lev, f in enumerate(a.frames, start=1):
                 fn = f'a{ai}_{word(axis)}{dim}_c{ci}_{word(cname)}{tid}_inst{src_inst}_level{lev}.jpg'
                 shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
                 rows.append((fn, ai, word(axis), dim, ci, word(cname), tid, src_inst, lev, f, alphas[f]))
