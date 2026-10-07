@@ -4,6 +4,7 @@ function label = chimera_labels(name)
 % prep_chimera_trials warns about them before the session starts.
 % Add the session's concepts and all 8 axis adjectives here. Keys are the
 % names as in the file names: one block of text, no dashes (gokart, foodrelated).
+% Axis words may be longer; '|' starts a new line on the response screen.
 persistent map
 if isempty(map)
     map = containers.Map();
@@ -91,14 +92,14 @@ if isempty(map)
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
     % axes (a<id>_<name>) as adjectives
-    map('metallicartificial') = 'metallisch';
-    map('foodrelated')        = 'essbar';
-    map('animalrelated')      = 'tierisch';
-    map('plantrelated')       = 'pflanzlich';
-    map('colorfulplayful')                 = 'bunt';         % check
-    map('outdoors')                         = 'draußen';      % check (adverb; alternatives: naturnah, im Freien)
-    map('bugrelatednonmammaliandisgusting') = 'eklig';        % check
-    map('childtoyrelatedcute')              = 'niedlich';     % check (alternative: verspielt)
+    map('metallicartificial') = 'metallisch|künstlich';   % check
+    map('foodrelated')        = 'essbar';   % check
+    map('animalrelated')      = 'tierisch';   % check
+    map('plantrelated')       = 'pflanzlich';   % check
+    map('colorfulplayful')                 = 'bunt|verspielt';   % check
+    map('outdoors')                         = 'für draußen';   % check
+    map('bugrelatednonmammaliandisgusting') = 'Insekt|eklig';   % check
+    map('childtoyrelatedcute')              = 'Spielzeug|niedlich';   % check
 end
 if isKey(map, name)
     label = map(name);

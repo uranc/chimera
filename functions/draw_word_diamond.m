@@ -26,6 +26,12 @@ end
 end
 
 function draw_centred(window, txt, xy, color)
-b = Screen('TextBounds', window, txt);
-Screen('DrawText', window, txt, xy(1) - b(3) / 2, xy(2) - b(4) / 2, color);
+% one or more lines (split at '|' in the label), each centred on xy
+lines = strsplit(txt, '|');
+h = Screen('TextBounds', window, 'Xg');
+y0 = xy(2) - numel(lines) * h(4) / 2;
+for i = 1:numel(lines)
+    b = Screen('TextBounds', window, lines{i});
+    Screen('DrawText', window, lines{i}, xy(1) - b(3) / 2, y0 + (i - 1) * h(4), color);
+end
 end

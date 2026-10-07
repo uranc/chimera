@@ -68,7 +68,7 @@ try
         dest = image_dest_rect(img0, wrect, image_scale);
         dest = OffsetRect(dest, 0, 0.04 * wrect(4));
         map = randperm(numel(axes_));            % key k moves along axis map(k)
-        target_label = chimera_labels(axis_names{tgt});
+        target_label = strrep(chimera_labels(axis_names{tgt}), '|', ' / ');
 
         pos = [map(1), 0];                       % (axis index, step); step 0 = original
         path = pos; times = 0;
