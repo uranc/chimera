@@ -70,7 +70,7 @@ mini.reps_exemplar  = 1;
 mini.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 mini.jitter_max     = 0.4;
 mini.fixation_duration = 0.3;
-mini.display_time   = 1.5;      % stimulus period, then the 4 words
+mini.response_timeout = Inf;    % image stays until left (one hand) / right (not), as in dynamic
 mini.blank_duration = 0.1;
 
 %% setup (no need to edit)
@@ -91,7 +91,7 @@ save(record_file, 'session_record', '-v7');
 session_record.results.naming = run_naming_eye(patient_id, session_nr, nam);
 save(record_file, 'session_record', '-v7');
 
-%% task 3: mini-screening (originals, written names, exemplars; 4-word choice)
+%% task 3: mini-screening (originals, written names, exemplars; one-hand left/right as in dynamic)
 session_record.results.miniscreening = run_miniscreening_eye(patient_id, session_nr, mini);
 save(record_file, 'session_record', '-v7');
 

@@ -9,8 +9,9 @@ function out = run_miniscreening_eye(patient_id, session_nr, overrides)
 %
 % Design (per concept of the session stimset): the original photo, the written
 % name and n_exemplars further photos (stimuli/subject<NNN>/originals), each
-% shown reps_original / reps_name / reps_exemplar times; every trial is a
-% 4-word choice like chimera (no target). No practice. F10 ends the session
+% shown reps_original / reps_name / reps_exemplar times; trial as in dynamic
+% run_mini_screening (spose_trial_eye): image until left = one-hand liftable,
+% right = not. No practice. F10 ends the session
 % at any wait; all data so far is saved. The whole plan is saved before
 % trial 1 and every trial is saved right after it ran.
 
@@ -213,7 +214,7 @@ try
         paradigm_times_daq(end+1) = send_train(hw, ev.start_of_block, TaskCodes.block_train(0), 'block-0_practice');
         paradigm_events_daq{end+1} = "practice";
         for k = 1:numel(practice)
-            [practice(k), blank_onset, aborted] = run_task_trial(practice(k), blank_onset, hw, p, log_dir, @chimera_trial_eye);
+            [practice(k), blank_onset, aborted] = run_task_trial(practice(k), blank_onset, hw, p, log_dir, @spose_trial_eye);
             if aborted, break; end
         end
         if ~aborted
@@ -258,7 +259,7 @@ try
                 paradigm_events_daq{end+1} = sprintf("block_%d", cfg.block_id);
             end
 
-            [plan(trial_idx), blank_onset, aborted] = run_task_trial(cfg, blank_onset, hw, p, log_dir, @chimera_trial_eye);
+            [plan(trial_idx), blank_onset, aborted] = run_task_trial(cfg, blank_onset, hw, p, log_dir, @spose_trial_eye);
             n_run = trial_idx;
             if aborted
                 stop_reason = 'abort';

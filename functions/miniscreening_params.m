@@ -2,8 +2,9 @@ function p = miniscreening_params(overrides)
 % MINISCREENING_PARAMS  Parameters of the mini-screening (task code 4).
 % Per session concept: the original photo (THINGS instance 0), the concept's
 % name written on a blank screen, and n_exemplars further THINGS photos
-% (instances 1..n). Every trial is a word choice like chimera (image for
-% display_time, then 4 axis words of the session, no target).
+% (instances 1..n). Trial as in the dynamic repo's run_mini_screening: the
+% image stays until the patient answers "can it be picked up with one hand?"
+% (left arrow = yes, right arrow = no); no words.
 % Built on chimera_params (same timing, display, keys, hardware) with the
 % values below; overrides work the same way (unknown names are an error).
 %   p = miniscreening_params()  /  p = miniscreening_params(overrides)
@@ -28,6 +29,14 @@ p.reps_name      = 1;       % presentations of each concept's written name (full
 p.n_exemplars    = 11;      % further photos per concept (instances 1..n), once each
 p.reps_exemplar  = 1;
 p.text_size_name = 110;     % written name, px on the 1024 x 1024 name image
+% response as in dynamic run_mini_screening: response k = keys{k}
+p.keys = {'LeftArrow', 'RightArrow'};      % left = can be picked up with one hand, right = not
+p.response_timeout = Inf;                  % image stays until a key
+p.instructions = ['In dieser Aufgabe wird Ihnen eine Bilderserie gezeigt.\n' ...
+    'Wenn der Inhalt des Bildes mit einer Hand aufgenommen werden kann,\n' ...
+    'drücken Sie die Pfeiltaste nach links.\n' ...
+    'Wenn nicht, drücken Sie die Pfeiltaste nach rechts.\n\n' ...
+    'Drücken Sie zum Starten die Leertaste.'];
 
 if nargin >= 1 && ~isempty(overrides)
     p = apply_overrides(p, overrides);

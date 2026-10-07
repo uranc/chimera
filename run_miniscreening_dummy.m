@@ -44,7 +44,7 @@ o.reps_exemplar  = 1;
 o.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 o.jitter_max     = 0.4;
 o.fixation_duration = 0.3;   % prestim fixation cross
-o.display_time   = 1.5;      % stimulus period, then the 4 words
+o.response_timeout = Inf;    % image stays until left (one hand) / right (not), as in dynamic
 o.blank_duration = 0.1;      % blank after each trial
 
 %% run

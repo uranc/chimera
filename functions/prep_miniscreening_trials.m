@@ -7,15 +7,15 @@ function [plan, practice, stim] = prep_miniscreening_trials(patient_id, session_
 %   name      : the concept's German name, drawn on a blank image at run time
 %               (image_file empty)                    x p.reps_name
 %   exemplar  : originals/..._inst1..n_exemplars      x p.reps_exemplar
-% Every trial: 4 words from the session's axes, no target (target_pos 0),
-% chosen like chimera's target-absent trials (least-used words per item,
-% balanced positions). axis_id / level_id are 0; concept_id is the concept's
+% Every trial as in dynamic run_mini_screening: image until left/right
+% ("can it be picked up with one hand?"), no words (options 0). axis_id /
+% level_id are 0; concept_id is the concept's
 % index in the session stimset (also for originals written by another set).
 % Order: no concept twice in a row (make_session_order over all
 % presentations; repeats of one item are not spaced further).
 %   stim : one entry per item (original, name, exemplars), stim_idx = row
 
-%% the session's concepts and axes (words)
+%% the session's concepts
 sess = load_stimuli(stim_dir, p, 'MINISCREENING: SESSION STIMULUS');
 axis_ids = unique([sess.axis_id]);
 axis_names = arrayfun(@(a) sess(find([sess.axis_id] == a, 1)).axis_name, axis_ids, 'UniformOutput', false);
@@ -67,8 +67,6 @@ pres = pres(order); rep = rep(order);
 n_trials = numel(pres);
 
 %% build the trials
-use = zeros(numel(stim), numel(axis_ids));     % word use per item
-pos = zeros(numel(axis_ids), p.n_options);     % position use per word
 plan = repmat(new_trial_cfg(p, patient_id, session_nr), 1, n_trials);
 for t = 1:n_trials
     s = stim(pres(t));
@@ -79,20 +77,7 @@ for t = 1:n_trials
     c.is_minimum = true;
     c.trial_type = TaskCodes.TRIAL_TYPES.(s.axis_name);
     c.trial_type_name = s.axis_name;
-    % least-used words for this item, then positions by least use per word
-    [~, o] = sort(use(s.stim_idx, :) + rand(1, numel(axis_ids)) * 0.5);
-    w = o(1:p.n_options);
-    use(s.stim_idx, w) = use(s.stim_idx, w) + 1;
-    pos_of = zeros(1, p.n_options); free = 1:p.n_options;
-    for d = w(randperm(numel(w)))
-        [~, q] = sort(pos(d, free) + rand(size(free)) * 0.5);
-        pos_of(free(q(1))) = d; free(q(1)) = [];
-    end
-    for k = 1:p.n_options, pos(pos_of(k), k) = pos(pos_of(k), k) + 1; end
-    c.option_axis_ids = axis_ids(pos_of);
-    c.option_names = axis_names(pos_of);
-    c.option_labels = cellfun(@chimera_labels, c.option_names, 'UniformOutput', false);
-    c.target_pos = 0;
+    c.target_pos = 0;                        % no words: one-hand question (p.keys)
     c.jitter_time = draw_jitter(p);
     c.daq_trial_values = TaskCodes.trial_train(c);
     plan(t) = c;
