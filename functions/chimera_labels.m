@@ -95,10 +95,10 @@ if isempty(map)
     map('foodrelated')        = 'essbar';
     map('animalrelated')      = 'tierisch';
     map('plantrelated')       = 'pflanzlich';
-    map('houserelatedfurnishingrelated') = 'häuslich';     % check
-    map('bodypeoplerelated')             = 'menschlich';   % check
     map('colorfulplayful')                 = 'bunt';         % check
     map('outdoors')                         = 'draußen';      % check (adverb; alternatives: naturnah, im Freien)
+    map('bugrelatednonmammaliandisgusting') = 'eklig';        % check
+    map('childtoyrelatedcute')              = 'niedlich';     % check (alternative: verspielt)
 end
 if isKey(map, name)
     label = map(name);

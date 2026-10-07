@@ -32,11 +32,11 @@ import argparse, os, shutil, sys
 import numpy as np
 
 SRC = os.path.join(os.path.dirname(__file__), '..', '..', 'cso', '_pending_stimuli_realvis_cn_preview_all12')
-# 8 axes = the 8 lowest-numbered (most important) SPoSE dimensions of the 12 generated,
-# in that order -> a1..a8
+# 8 axes (of the 12 generated; water, weapon, body/people, house left out),
+# in SPoSE order -> a1..a8
 AXES = [(1, 'metallic-artificial'), (2, 'food-related'), (3, 'animal-related'), (5, 'plant-related'),
-        (6, 'house-related-furnishing-related'), (9, 'body--people-related'),
-        (12, 'colorful-playful'), (13, 'outdoors')]
+        (12, 'colorful-playful'), (13, 'outdoors'), (40, 'bug-related-non-mammalian-disgusting'),
+        (54, 'child--toy-related-cute')]
 def word(name):
     """one block of text for file names: drop dashes and anything non-alphanumeric"""
     return ''.join(ch for ch in name if ch.isalnum())
