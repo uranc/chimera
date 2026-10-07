@@ -93,9 +93,9 @@ if isempty(map)
     map('frog')      = 'Frosch';
     % axes (a<id>_<name>) as adjectives
     map('metallicartificial') = 'metallisch|künstlich';   % check
-    map('foodrelated')        = 'essbar';   % check
-    map('animalrelated')      = 'tierisch';   % check
-    map('plantrelated')       = 'pflanzlich';   % check
+    map('foodrelated')        = 'Essen';   % check
+    map('animalrelated')      = 'Tier';   % check
+    map('plantrelated')       = 'Pflanze';   % check
     map('colorfulplayful')                 = 'bunt|verspielt';   % check
     map('outdoors')                         = 'draußen|Außenbereich';   % check
     map('bugrelatednonmammaliandisgusting') = 'Insekt, Kriechtier|eklig';   % check
