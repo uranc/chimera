@@ -91,15 +91,15 @@ if isempty(map)
     map('flashlight') = 'Taschenlampe';
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
-    % axes (a<id>_<name>): nouns for categories, adjectives for qualities
+    % axes (a<id>_<name>): adjectives; '-ähnlich' where a plain adjective is unclear
     map('metallicartificial') = 'metallisch|künstlich';   % check
-    map('foodrelated')        = 'Essen';   % check
-    map('animalrelated')      = 'Tier';   % check
-    map('plantrelated')       = 'Pflanze';   % check
+    map('foodrelated')        = 'essbar';   % check
+    map('animalrelated')      = 'tierähnlich';   % check
+    map('plantrelated')       = 'pflanzenähnlich';   % check
     map('colorfulplayful')                 = 'bunt|verspielt';   % check
     map('outdoors')                         = 'draußen|Außenbereich';   % check
-    map('bugrelatednonmammaliandisgusting') = 'Insekt, Kriechtier|eklig';   % check
-    map('childtoyrelatedcute')              = 'Kind, Spielzeug|niedlich';   % check
+    map('bugrelatednonmammaliandisgusting') = 'insektenähnlich|eklig';   % check
+    map('childtoyrelatedcute')              = 'kindlich, spielzeugähnlich|niedlich';   % check
 end
 if isKey(map, name)
     label = map(name);
