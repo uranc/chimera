@@ -91,7 +91,7 @@ if isempty(map)
     map('flashlight') = 'Taschenlampe';
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
-    % axes (a<id>_<name>) as adjectives
+    % axes (a<id>_<name>): nouns for categories, adjectives for qualities
     map('metallicartificial') = 'metallisch|künstlich';   % check
     map('foodrelated')        = 'Essen';   % check
     map('animalrelated')      = 'Tier';   % check
