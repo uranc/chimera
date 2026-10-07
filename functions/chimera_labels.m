@@ -98,8 +98,8 @@ if isempty(map)
     map('plantrelated')       = 'pflanzlich';   % check
     map('colorfulplayful')                 = 'bunt|verspielt';   % check
     map('outdoors')                         = 'für draußen';   % check
-    map('bugrelatednonmammaliandisgusting') = 'Insekt|eklig';   % check
-    map('childtoyrelatedcute')              = 'Spielzeug|niedlich';   % check
+    map('bugrelatednonmammaliandisgusting') = 'Insekt, Kriechtier|eklig';   % check
+    map('childtoyrelatedcute')              = 'Kind, Spielzeug|niedlich';   % check
 end
 if isKey(map, name)
     label = map(name);
