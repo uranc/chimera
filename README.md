@@ -4,8 +4,8 @@ Task scripts for the closed-loop visual paradigms, built on the skeleton of the 
 `run_dynamic_eye.m` / `run_mini_screening.m` and their helpers (`daqInit`, `daqOut`,
 `fixation_cross_eye`, Titta).
 
-Whole session: open `run_session.m`, set `patient_id`, `session_nr` and `test_mode` at the top, run it
-(or one task section at a time). It runs chimera, then naming, and saves
+Experiment: open `run_session.m`, set `patient_id` and `session_nr` at the top, run it (or one task
+section at a time). Testing / debugging: the `run_<task>_dummy.m` scripts. It runs chimera, then naming, and saves
 `logs/<pid>/<pid>_<sess>/session_<time>.mat` (settings, outcome of every task, code version).
 
 | task | rig script | debug script | parameters | task code |
@@ -18,7 +18,7 @@ Whole session: open `run_session.m`, set `patient_id`, `session_nr` and `test_mo
 - Rig: `run_chimera_eye(patient_id, session_nr)`. Stimuli are read from
   `stimuli/subject<NNN>/subject<NNN>_stimset<NN>/`, logs written to `logs/<pid>/<pid>_<sess>/`.
 - The dummy scripts (plain scripts) run exactly the rig code with the test settings written out at
-  their top: no DAQ, no eye tracker, windowed, keyboard polling. run_session has the same list for its test mode.
+  their top: no DAQ, no eye tracker, windowed, keyboard polling.
 - Stimuli (not in git): `setup/make_stimset.py` builds `stimuli/subject<NNN>/` with
   `subject<NNN>_stimset<NN>/` (one flat folder per session), `originals/` and `practice/`; files `a<a>_<axis><dim>_c<c>_<concept><things>_inst<k>_level<L>.jpg`,
   e.g. `a8_outdoors13_c1_glove681_inst0_level2.jpg`: a, c = indices in the set (sent on the daq),
