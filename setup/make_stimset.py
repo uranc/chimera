@@ -107,13 +107,20 @@ for ci, tid in enumerate(concepts, start=1):
                 shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
                 rows.append((fn, ai, word(axis), dim, ci, word(cname), tid, src_inst, lev, f, alphas[f]))
                 n += 1
-            if orig_dir:
-                orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
-                if not os.path.exists(os.path.join(orig_dir, orig)):
-                    os.makedirs(orig_dir, exist_ok=True)
-                    shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
-                    rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, alphas[0]))
-                    n += 1
+    if orig_dir:
+        # originals: every source instance of the concept (mini-screening exemplars), not only --inst
+        all_insts = {}
+        for dim, axis in AXES:
+            for q in os.listdir(os.path.join(a.src, axis)):
+                if q.startswith(f'{src_stem[tid]}_inst'):
+                    all_insts.setdefault(int(q.rsplit('_inst', 1)[1]), os.path.join(a.src, axis, q))
+        for src_inst, sdir in sorted(all_insts.items()):
+            orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
+            if not os.path.exists(os.path.join(orig_dir, orig)):
+                os.makedirs(orig_dir, exist_ok=True)
+                shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
+                rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, 0.0))
+                n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
     fh.write('file,axis_idx,axis_name,spose_dim,concept_idx,concept_name,things_id,inst,level,source_frame,alpha\n')
