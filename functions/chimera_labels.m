@@ -2,7 +2,8 @@ function label = chimera_labels(name)
 % CHIMERA_LABELS  German on-screen word for a concept or axis token from the
 % stimulus file names. Unknown tokens return the token itself;
 % prep_chimera_trials warns about them before the session starts.
-% Add the session's concepts and all 8 axis adjectives here.
+% Add the session's concepts and all 8 axis adjectives here. Keys are the
+% names as in the file names: one block of text, no dashes (gokart, foodrelated).
 persistent map
 if isempty(map)
     map = containers.Map();
@@ -17,7 +18,7 @@ if isempty(map)
     map('snail')     = 'Schnecke';
     map('peacock')   = 'Pfau';
     map('pineapple') = 'Ananas';
-    map('go-kart')   = 'Gokart';
+    map('gokart')   = 'Gokart';
     map('playpen')   = 'Laufstall';
     map('camel')     = 'Kamel';
     map('horse')     = 'Pferd';
@@ -90,13 +91,13 @@ if isempty(map)
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
     % axes (a<id>_<name>) as adjectives
-    map('metallic-artificial') = 'metallisch';
-    map('food-related')        = 'essbar';
-    map('animal-related')      = 'tierisch';
-    map('plant-related')       = 'pflanzlich';
-    map('house-related-furnishing-related') = 'häuslich';     % check
-    map('body--people-related')             = 'menschlich';   % check
-    map('colorful-playful')                 = 'bunt';         % check
+    map('metallicartificial') = 'metallisch';
+    map('foodrelated')        = 'essbar';
+    map('animalrelated')      = 'tierisch';
+    map('plantrelated')       = 'pflanzlich';
+    map('houserelatedfurnishingrelated') = 'häuslich';     % check
+    map('bodypeoplerelated')             = 'menschlich';   % check
+    map('colorfulplayful')                 = 'bunt';         % check
     map('outdoors')                         = 'draußen';      % check (adverb; alternatives: naturnah, im Freien)
 end
 if isKey(map, name)

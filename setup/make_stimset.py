@@ -13,7 +13,7 @@ Output: one folder per subject, stimuli/subject<NNN>/, holding
         c      = concept index in this set (1..n, in THINGS order; sent on the daq)
         things = THINGS concept number (1..1854, unique_id.txt order)
         k      = source instance, L = 1..3 generated level (frames 2, 4, 6)
-        e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg
+        e.g. a8_outdoors13_c1_glove681_inst0_level2.jpg (names without dashes: metallicartificial1)
         stimset_map.csv   per file: indices, SPoSE dim, THINGS number, instance, frame, alpha
     originals/a0_original0_c<c>_<conceptname><things>_inst<k>_level0.jpg
         the original photos (identical on every axis, stored once; mini-screening)
@@ -37,6 +37,10 @@ SRC = os.path.join(os.path.dirname(__file__), '..', '..', 'cso', '_pending_stimu
 AXES = [(1, 'metallic-artificial'), (2, 'food-related'), (3, 'animal-related'), (5, 'plant-related'),
         (6, 'house-related-furnishing-related'), (9, 'body--people-related'),
         (12, 'colorful-playful'), (13, 'outdoors')]
+def word(name):
+    """one block of text for file names: drop dashes and anything non-alphanumeric"""
+    return ''.join(ch for ch in name if ch.isalnum())
+
 FRAMES = [2, 4, 6]          # levels 1..3: evenly spaced generated frames incl. the maximum
 THINGS_IDS = os.path.expanduser('~/Documents/THINGS-database/behavior/variables/unique_id.txt')
 
@@ -82,7 +86,7 @@ if missing:
 
 os.makedirs(a.out, exist_ok=True)
 rows, n = [], 0
-bad = [names[t] for t in concepts if names[t][-1].isdigit()]
+bad = [names[t] for t in concepts if word(names[t])[-1].isdigit()]
 if bad:
     sys.exit(f'concept names ending in a digit would be ambiguous in the file name: {bad}')
 for ci, tid in enumerate(concepts, start=1):
@@ -96,16 +100,16 @@ for ci, tid in enumerate(concepts, start=1):
             sdir = os.path.join(a.src, axis, f'{src_stem[tid]}_inst{src_inst}')
             alphas = np.load(os.path.join(sdir, 'dense_alphas.npy'))
             for lev, f in enumerate(FRAMES, start=1):
-                fn = f'a{ai}_{axis}{dim}_c{ci}_{cname}{tid}_inst{src_inst}_level{lev}.jpg'
+                fn = f'a{ai}_{word(axis)}{dim}_c{ci}_{word(cname)}{tid}_inst{src_inst}_level{lev}.jpg'
                 shutil.copyfile(os.path.join(sdir, f'f{f:03d}.jpg'), os.path.join(a.out, fn))
-                rows.append((fn, ai, axis, dim, ci, cname, tid, src_inst, lev, f, alphas[f]))
+                rows.append((fn, ai, word(axis), dim, ci, word(cname), tid, src_inst, lev, f, alphas[f]))
                 n += 1
             if orig_dir:
-                orig = f'a0_original0_c{ci}_{cname}{tid}_inst{src_inst}_level0.jpg'
+                orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
                 if not os.path.exists(os.path.join(orig_dir, orig)):
                     os.makedirs(orig_dir, exist_ok=True)
                     shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
-                    rows.append(('../originals/' + orig, 0, 'original', 0, ci, cname, tid, src_inst, 0, 0, alphas[0]))
+                    rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, alphas[0]))
                     n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
