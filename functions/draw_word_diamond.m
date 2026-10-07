@@ -3,15 +3,15 @@ function draw_word_diamond(window, windowRect, labels, white, p, chosen)
 % the 4 words around the screen centre, where the image was, at the
 % positions of the arrow keys: option 1 up, 2 left, 3 right, 4 down
 % (p.adj_keys = {'UpArrow','LeftArrow','RightArrow','DownArrow'}).
-% A small arrow mark sits between the centre and each word.
+% A filled arrow head points from the centre towards each word.
 % chosen (optional): index of the selected word, drawn in p.highlight_color.
 if nargin < 6, chosen = 0; end
 W = windowRect(3); H = windowRect(4);
 cx = W / 2; cy = H / 2;
-dx = p.word_dx * W; dy = p.word_dy * H;
-pos   = [cx, cy - dy; cx - dx, cy; cx + dx, cy; cx, cy + dy];
-marks = {'^', '<', '>', 'v'};
-mark_pos = [cx, cy - dy / 2; cx - dx / 2, cy; cx + dx / 2, cy; cx, cy + dy / 2];
+r   = p.arrow_dist * H;          % centre -> arrow tip
+sz  = p.arrow_size * H;          % arrow length
+gap = 0.4 * sz;                  % arrow -> word
+dirs = [0 -1; -1 0; 1 0; 0 1];   % up, left, right, down (= option 1..4)
 
 Screen('TextSize', window, p.text_size_prompt);
 DrawFormattedText(window, p.adj_prompt, 'center', 0.12 * H, white);
@@ -20,18 +20,30 @@ draw_fixation_dot(window, windowRect, p);
 for k = 1:numel(labels)
     color = white;
     if k == chosen, color = p.highlight_color; end
-    draw_centred(window, labels{k}, pos(k, :), color);
-    draw_centred(window, marks{k}, mark_pos(k, :), white);
+    d = dirs(k, :);
+    % filled arrow head pointing outwards, tip at r from the centre
+    tip  = [cx, cy] + d * r;
+    base = [cx, cy] + d * (r - sz);
+    side = [-d(2), d(1)] * sz * 0.6;
+    Screen('FillPoly', window, white, [tip; base + side; base - side], 1);
+    % word just beyond the arrow: its inner edge faces the arrow
+    draw_word(window, labels{k}, [cx, cy] + d * (r + gap), d, color);
 end
 end
 
-function draw_centred(window, txt, xy, color)
-% one or more lines (split at '|' in the label), each centred on xy
+function draw_word(window, txt, xy, d, color)
+% one or more lines (split at '|'); the block's edge nearest the centre sits at xy
 lines = strsplit(txt, '|');
-h = Screen('TextBounds', window, 'Xg');
-y0 = xy(2) - numel(lines) * h(4) / 2;
+h = Screen('TextBounds', window, 'Xg'); lh = h(4);
+w = 0;
+for i = 1:numel(lines)
+    b = Screen('TextBounds', window, lines{i}); w = max(w, b(3));
+end
+bh = numel(lines) * lh;
+x0 = xy(1) - w / 2 + d(1) * w / 2;      % left/right: shift the block outwards
+y0 = xy(2) - bh / 2 + d(2) * bh / 2;    % up/down: shift the block outwards
 for i = 1:numel(lines)
     b = Screen('TextBounds', window, lines{i});
-    Screen('DrawText', window, lines{i}, xy(1) - b(3) / 2, y0 + (i - 1) * h(4), color);
+    Screen('DrawText', window, lines{i}, x0 + (w - b(3)) / 2, y0 + (i - 1) * lh, color);
 end
 end
