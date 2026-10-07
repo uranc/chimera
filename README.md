@@ -4,9 +4,9 @@ Task scripts for the closed-loop visual paradigms, built on the skeleton of the 
 `run_dynamic_eye.m` / `run_mini_screening.m` and their helpers (`daqInit`, `daqOut`,
 `fixation_cross_eye`, Titta).
 
-Whole session: `run_session(patient_id, session_nr)` runs the tasks in order (chimera, then naming) and
-saves `logs/<pid>/<pid>_<sess>/session_<time>.mat` (tasks, overrides, outcomes, code version).
-`run_session(pid, sess, 'dummy')` runs the same with the test settings of `functions/dummy_overrides.m`.
+Whole session: open `run_session.m`, set `patient_id`, `session_nr` and `test_mode` at the top, run it
+(or one task section at a time). It runs chimera, then naming, and saves
+`logs/<pid>/<pid>_<sess>/session_<time>.mat` (settings, outcome of every task, code version).
 
 | task | rig script | debug script | parameters | task code |
 |---|---|---|---|---|
