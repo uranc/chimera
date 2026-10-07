@@ -8,8 +8,8 @@
 %% settings
 patient_id = 99;
 session_nr = 1;
-test_mode  = true;     % true: no DAQ / eye tracker, windowed, keyboard polling
-                       %       (functions/dummy_overrides.m); false: rig
+test_mode  = true;     % true: the test settings of run_<task>_dummy.m (no DAQ /
+                       %       eye tracker, windowed, keyboard polling); false: rig
 
 % stimuli: stimuli/subject<NNN>/subject<NNN>_stimset<NN>/ and .../practice/
 % (built with setup/make_stimset.py); override here only if needed, e.g.
@@ -29,7 +29,7 @@ record_file = fullfile(log_dir, sprintf('session_%s.mat', datestr(now, 'yyyymmdd
 
 %% task 1: chimera (adjective 4AFC, 96 images x 6)
 o = overrides;
-if test_mode, o = apply_test_overrides(dummy_overrides('chimera'), o); end
+if test_mode, o = apply_test_overrides(run_chimera_dummy('overrides'), o); end
 session_record.results.chimera = run_chimera_eye(patient_id, session_nr, o);
 save(record_file, 'session_record', '-v7');
 
@@ -37,7 +37,7 @@ save(record_file, 'session_record', '-v7');
 
 %% task 3: naming (image stays on, spoken answer recorded)
 o = overrides;
-if test_mode, o = apply_test_overrides(dummy_overrides('naming'), o); end
+if test_mode, o = apply_test_overrides(run_naming_dummy('overrides'), o); end
 session_record.results.naming = run_naming_eye(patient_id, session_nr, o);
 save(record_file, 'session_record', '-v7');
 
