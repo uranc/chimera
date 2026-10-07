@@ -41,7 +41,6 @@ o.axis_subset    = [];       % [] = all
 o.concept_subset = [];       % [] = all
 o.min_reps       = 6;        % reps per image (64 images x 6 = 384 trials)
 o.max_reps       = 6;
-o.max_minutes    = 40;
 o.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 o.jitter_max     = 0.4;
 o.fixation_duration = 0.3;   % prestim fixation cross

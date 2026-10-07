@@ -1,6 +1,6 @@
 function [cfg, blank_onset, aborted] = run_task_trial(cfg, blank_onset, hw, p, log_dir, trial_fn)
 % RUN_TASK_TRIAL  One trial of a ptb task, shared by run_chimera_eye and
-% run_spose_eye / run_miniscreening_eye:
+% run_spose_eye:
 %   trial_start marker + trial train (all predetermined trial parameters)
 %   image read from disk
 %   blank until blank_onset + blank_duration + jitter_time, then the
@@ -13,11 +13,7 @@ function [cfg, blank_onset, aborted] = run_task_trial(cfg, blank_onset, hw, p, l
 ev = TaskCodes.EVENTS;
 ts_trial_daq = send_train(hw, ev.trial_start, cfg.daq_trial_values, ...
     sprintf('trial_block-%i_trial-%i', cfg.block_id, cfg.trial_id));
-if isempty(cfg.image_file)                     % mini-screening name trial: the word on a blank image
-    img = name_image(hw.window, chimera_labels(cfg.concept_name), p);
-else
-    img = imread(cfg.image_file);
-end
+img = imread(cfg.image_file);
 
 wait_left = max(0, blank_onset + p.blank_duration + cfg.jitter_time - GetSecs);
 [ts_fix, ts_fix_daq] = fixation_cross_eye(wait_left, p.fixation_duration, ...
@@ -38,12 +34,3 @@ save_trial(log_dir, p.file_prefix, cfg);
 blank_onset = res.ts_blank;
 end
 
-
-function img = name_image(window, txt, p)
-% the concept's name, white on black, as a 1024 x 1024 image (shown like any image)
-off = Screen('OpenOffscreenWindow', window, 0, [0 0 1024 1024]);
-Screen('TextSize', off, p.text_size_name);
-DrawFormattedText(off, txt, 'center', 'center', 255);
-img = Screen('GetImage', off);
-Screen('Close', off);
-end

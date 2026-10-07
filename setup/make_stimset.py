@@ -45,6 +45,29 @@ def word(name):
 FRAMES = [2, 4, 6]          # levels 1..3: evenly spaced generated frames incl. the maximum
 THINGS_IMAGES = os.path.expanduser('~/Documents/THINGS-database/osfstorage/images_THINGS/object_images')
 RES = 1024                  # generated image size; originals are resized to it
+LABELS = os.path.join(os.path.dirname(__file__), '..', 'functions', 'chimera_labels.m')
+FONTS = ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 'C:/Windows/Fonts/arial.ttf',
+         '/Library/Fonts/Arial.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']
+
+
+def german_label(key):
+    """on-screen German word for a file-name key, from functions/chimera_labels.m"""
+    import re
+    for k, v in re.findall(r"map\('(\w+)'\)\s*=\s*'([^']*)'", open(LABELS, encoding='utf-8').read()):
+        if k == key:
+            return v
+    sys.exit(f'no German label for {key} in chimera_labels.m')
+
+
+def name_image(text, path):
+    """the written name, white on black, RES x RES (mini-screening name trials)"""
+    from PIL import ImageDraw, ImageFont
+    font = ImageFont.truetype(next(f for f in FONTS if os.path.exists(f)), 110)
+    im = Image.new('RGB', (RES, RES), 0)
+    d = ImageDraw.Draw(im)
+    x0, y0, x1, y1 = d.textbbox((0, 0), text, font=font)
+    d.text(((RES - (x1 - x0)) / 2 - x0, (RES - (y1 - y0)) / 2 - y0), text, fill=(255, 255, 255), font=font)
+    im.save(path, quality=95)
 THINGS_IDS = os.path.expanduser('~/Documents/THINGS-database/behavior/variables/unique_id.txt')
 
 ap = argparse.ArgumentParser()
@@ -127,6 +150,12 @@ for ci, tid in enumerate(concepts, start=1):
                 Image.open(ph).convert('RGB').resize((RES, RES), Image.LANCZOS).save(os.path.join(orig_dir, orig), quality=95)
                 rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, 0.0))
                 n += 1
+        # the written name (mini-screening), one per concept
+        nm = f'a0_name0_c{ci}_{word(cname)}{tid}_inst0_level0.jpg'
+        if not glob.glob(os.path.join(orig_dir, f'a0_name0_c*_{word(cname)}{tid}_inst0_level0.jpg')):
+            name_image(german_label(word(cname)), os.path.join(orig_dir, nm))
+            rows.append(('../originals/' + nm, 0, 'name', 0, ci, word(cname), tid, 0, 0, 0, 0.0))
+            n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
     fh.write('file,axis_idx,axis_name,spose_dim,concept_idx,concept_name,things_id,inst,level,source_frame,alpha\n')

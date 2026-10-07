@@ -54,7 +54,7 @@ classdef TaskCodes
 
         % trial types (sent in TRAIN_TRIAL)
         TRIAL_TYPES = struct('adjective', 1, 'catch', 2, 'naming', 3, 'liftable', 4, ...
-            'original', 5, 'name', 6, 'exemplar', 7);   % 5..7: mini-screening (4 words, no target)
+            'original', 5, 'name', 6, 'exemplar', 7);   % 5..7: mini-screening (one-hand question)
 
         % correctness codes (sent in TRAIN_OUTCOME)
         CORRECT = struct('wrong', 0, 'right', 1, 'not_applicable', 2);

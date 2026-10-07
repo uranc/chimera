@@ -27,7 +27,6 @@ chim.axis_subset    = [];       % [] = all
 chim.concept_subset = [];       % [] = all
 chim.min_reps       = 6;        % reps per image (64 images x 6 = 384 trials)
 chim.max_reps       = 6;
-chim.max_minutes    = 40;
 chim.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 chim.jitter_max     = 0.4;
 chim.fixation_duration = 0.3;   % prestim fixation cross
@@ -54,24 +53,17 @@ nam.display_time    = 1.5;      % (naming: the image stays until Space; the beep
 nam.tone_delay      = 0.5;     % answer beep, s after image onset (image stays on)
 nam.use_microphone  = true;
 
-% task 3: mini-screening (task class TaskCodes.TASKS.miniscreening = 4)
+% task 3: mini-screening (dynamic's run_mini_screening; plain daq events, no trial trains)
 mini = struct();
-mini.stim_dir       = chim.stim_dir;        % the session's concepts and axes (words)
-mini.originals_dir  = fullfile(stim_root, 'originals');
-mini.exp_axes       = 8;
-mini.exp_concepts   = 4;
-mini.exp_levels     = 2;
-mini.exp_insts      = 1;
-mini.step_subset    = [1 2];
-mini.reps_original  = 8;        % original x8
-mini.reps_name      = 8;        % written name x8
-mini.n_exemplars    = 11;       % THINGS instances 1..11, once each (8+ trials per condition)
-mini.reps_exemplar  = 1;
+mini.stim_dir       = chim.stim_dir;        % the session's concepts
+mini.originals_dir  = fullfile(stim_root, 'originals');   % originals, names, exemplars
+mini.nm_blocks      = 8;        % original + name once per block -> 8 reps each
+mini.n_exemplars    = 11;       % THINGS instances 1..11, once each (spread over the blocks)
 mini.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 mini.jitter_max     = 0.4;
 mini.fixation_duration = 0.3;
-mini.response_timeout = Inf;    % image stays until left (one hand) / right (not), as in dynamic
-mini.blank_duration = 0.1;
+mini.blank_duration = 0.1;      % image stays until left (one hand) / right (not)
+mini.use_eyetracking = true;
 
 %% setup (no need to edit)
 addpath(genpath(fullfile(here, 'functions')));
@@ -91,7 +83,7 @@ save(record_file, 'session_record', '-v7');
 session_record.results.naming = run_naming_eye(patient_id, session_nr, nam);
 save(record_file, 'session_record', '-v7');
 
-%% task 3: mini-screening (originals, written names, exemplars; one-hand left/right as in dynamic)
+%% task 3: mini-screening (as in dynamic: one hand? left = yes / right = no)
 session_record.results.miniscreening = run_miniscreening_eye(patient_id, session_nr, mini);
 save(record_file, 'session_record', '-v7');
 

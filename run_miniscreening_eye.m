@@ -1,85 +1,119 @@
-function out = run_miniscreening_eye(patient_id, session_nr, overrides)
-% RUN_MINISCREENING_EYE  Mini-screening (task code 4), same skeleton as
-% run_chimera_eye / run_dynamic_eye and the same helpers.
+function out = run_miniscreening_eye(patient_id, session_nr, o)
+% RUN_MINISCREENING_EYE  The dynamic repo's run_mini_screening.m, unchanged
+% except for the images and reps, the daq trains of the other tasks (session,
+% block, trial parameters, outcome; TaskCodes.m) and settings passed in o:
+% per concept of the session stimset, the original photo and the written
+% name in every block (nm_blocks times), plus n_exemplars further photos
+% once each, spread over the blocks (miniscreening_prep_trial_strx).
+% Images: stimuli/subject<NNN>/originals (setup/make_stimset.py).
 %
-%   out = run_miniscreening_eye(patient_id, session_nr)           rig
-%   run_miniscreening_eye(patient_id, session_nr, overrides)  parameter overrides
-%                                                       (run_miniscreening_dummy)
-% All parameters: functions/miniscreening_params.m. Daq protocol: functions/TaskCodes.m.
+%   run_miniscreening_eye(patient_id, session_nr)       rig
+%   run_miniscreening_eye(patient_id, session_nr, o)    o.<name> overrides the
+%       settings at the top (nm_blocks, n_exemplars, stim_dir, originals_dir,
+%       use_eyetracking, use_daq, windowed_mode, window_rect, skip_sync_tests,
+%       jitter_min/max, fixation_duration, blank_duration, dynamic_fcn_dir)
 %
-% Design (per concept of the session stimset): the original photo, the written
-% name and n_exemplars further photos (stimuli/subject<NNN>/originals), each
-% shown reps_original / reps_name / reps_exemplar times; trial as in dynamic
-% run_mini_screening (spose_trial_eye): image until left = one-hand liftable,
-% right = not. No practice. F10 ends the session
-% at any wait; all data so far is saved. The whole plan is saved before
-% trial 1 and every trial is saved right after it ran.
+% each image is shown until the patient responds with a L/R key press
+%
+% press F10 at any point during a trial's response window to abort the
+% screening early - all data collected up to that point is still saved
 
-%% exp parameters
-if nargin < 3, overrides = struct(); end
+nm_blocks = 8;                  % original + name shown once per block -> 8 reps
+n_exemplars = 11;               % further photos per concept (instances 1..11), once each
+
+jitter_min = 0.2;
+jitter_max = 0.4;
+fixation_duration = 0.3;
+blank_duration = 0.1;
+
+use_eyetracking = false;
+use_daq = true;
+skip_sync_tests = 0;
+window_rect = [0, 0, 800, 600];
+
 base_dir = fileparts(mfilename('fullpath'));
-addpath(genpath(fullfile(base_dir, 'functions')));
-p = miniscreening_params(overrides);
+stim_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), sprintf('subject%03d_stimset%02d', patient_id, session_nr));
+originals_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), 'originals');
+dynamic_fcn_dir = {fullfile(base_dir, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...
+    fullfile(base_dir, '..', 'dynamic', 'code', 'experiment', 'functions')};
 
-%% exp init
-check_dynamic_helpers(p.dynamic_fcn_dir);
-if p.use_daq
-    daq = daqInit;
-else
-    daq = 0;                                   % daqOut(0, x) only prints "-> x"
+% debugging params
+windowed_mode = false;
+
+% settings passed in (run_session / run_miniscreening_dummy)
+if nargin < 3, o = struct(); end
+fn = fieldnames(o);
+for k = 1:numel(fn)
+    eval(sprintf('%s = o.%s;', fn{k}, fn{k}));
 end
-whichScreen = p.which_screen;
+
+addpath(genpath(fullfile(base_dir, 'functions')));
+check_dynamic_helpers(dynamic_fcn_dir);        % daqInit, daqOut, fixation_cross_eye, instruction screen
+
+if use_daq
+    daq=daqInit;
+else
+    daq = 0;                                   % daqOut(0, x) only prints
+end
+whichScreen = 0;
 KbName('UnifyKeyNames');
-kb_mode(p.kb_mode);
-ev = TaskCodes.EVENTS;                         % event codes, see functions/TaskCodes.m
+
+% each time a daq event is sent, a message is sent to the Tobii.
+daq_start_of_paradigm = 1;      % 00000001  -  instruction screen
+daq_start_of_block = 2;         % 00000010  -  start of block (e.g. set of trials)
+daq_fix_cross = 4;              % 00000100  -  fixation cross onset
+
+daq_img_on = 22;                % 00010110  -  onset of an image
+daq_img_off = 65;               % 01000001  -  offset of an image
+
+daq_eye = 32;                   % 00100000  -  Tobii initialized/deinitialized
+daq_response = 64;              % 01000000  -  participant key press
+daq_question = 128;             % 10000000  -  participant prompted to respond
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% stimulus initialization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-stim_dir = p.stim_dir;
-if isempty(stim_dir)
-    stim_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), ...
-        sprintf('subject%03d_stimset%02d', patient_id, session_nr));
-end
-log_dir = prepare_log_dir(fullfile(base_dir, 'logs', sprintf('%d', patient_id), ...
-    sprintf('%d_%d', patient_id, session_nr)));
-% every file of this run carries its start time, so no run can overwrite another
-p.file_prefix = sprintf('%s_%s', p.task_name, datestr(now, 'yyyymmdd_HHMMSS'));
+log_dir = fullfile(base_dir, 'logs', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
+file_prefix = sprintf('mini_screening_%s', datestr(now, 'yyyymmdd_HHMMSS'));   % no run overwrites another
 
-if isempty(p.practice_dir)                     % the subject's practice folder, if there is one
-    p.practice_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), 'practice');
-end
-if isempty(p.rng_seed), rng('shuffle'); else, rng(p.rng_seed); end
-rng_state = rng;
-
+% randomization and trial structure preparation
 disp("Preparing mini-screening stimuli....");
-if isempty(p.originals_dir)
-    p.originals_dir = fullfile(base_dir, 'stimuli', sprintf('subject%03d', patient_id), 'originals');
-end
-[plan, practice, stim] = prep_miniscreening_trials(patient_id, session_nr, p, stim_dir, log_dir);
-n_min_trials = numel(plan);
 
-% INIT variables for collecting exp data (paradigm-level daq events)
-paradigm_times_daq = [];
-paradigm_events_daq = {};
-stop_reason = 'plan_complete';
+[jitter_times, ...
+    img_names, img_randomization, Images, ...
+    Images_mini_screening_filenames, ...
+    log_dir, trial_values] = miniscreening_prep_trial_strx(patient_id, session_nr,...
+    nm_blocks, jitter_min, jitter_max, stim_dir, originals_dir, n_exemplars, log_dir, file_prefix);
 
-session_cfg = struct('patient_id', patient_id, 'session_nr', session_nr, ...
-    'task_name', p.task_name, 'task_type', p.task_type, 'params', p, ...
-    'stim_dir', stim_dir, 'log_dir', log_dir, 'file_prefix', p.file_prefix, 'n_images', numel(stim), ...
-    'n_trials_planned', numel(plan), 'n_min_trials', n_min_trials, ...
-    'daq_found', daq ~= 0, 'protocol_version', TaskCodes.PROTOCOL_VERSION, ...
-    'protocol', TaskCodes.snapshot(), 'rng_state', rng_state, ...
-    'created', datestr(now), 'screen', [], 'audio_fs', NaN, 'audio', [], ...
-    'n_trials_run', 0, 'stop_reason', '', 'minutes_run', NaN);
-save(fullfile(log_dir, [p.file_prefix '_session_cfg.mat']), 'session_cfg', '-v7');
+% INIT empty variables for collecting exp data
+% paradigm-level daq events / triggers
+paradigm_times_daq = NaN(1, 3);       % + session, blocks, gaze_off appended
+
+
+% within-loop events
+fix_times_ts = NaN(size(Images));
+fix_times_daq = NaN(size(Images));
+
+miniscr_imgOn_ts  = NaN(size(Images));
+miniscr_imgOn_daq = NaN(size(Images));
+
+miniscr_imgOff_ts  = NaN(size(Images));
+miniscr_imgOff_daq = NaN(size(Images));
+
+pat_response_values = NaN(size(Images));
+pat_response_ts = NaN(size(Images));
+pat_response_daq = NaN(size(Images));
+
+% tracks whether the session was aborted early via F10, saved alongside
+% the other paradigm-level metadata so it's clear in the data later
+abort_early = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% eyetracker initialization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if p.use_eyetracking
+if use_eyetracking
     settings = Titta.getDefaults("Tobii Pro Spark");
     settings.debugMode = false;
 
@@ -90,237 +124,310 @@ if p.use_eyetracking
     EThndl = Titta(settings);
     EThndl.init();
 else
+    % dummy placeholder so EThndl can still be passed to helper
+    % functions without error (those functions internally
+    % check use_eyetracking / isempty(EThndl) before calling any
+    % Titta/Tobii methods on it)
     EThndl = [];
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% microphone and answer tone initialization (naming trials)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-[pa, audio_fs] = audio_open(p);
-session_cfg.audio_fs = audio_fs;
-tone = tone_open(p);                           % answer tone (sync pulse at its onset)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a%%%%%%%%%
 %% PARADIGM START
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("Stimuli loaded. Press ESC to begin.");
 keypressed = 0;
 while keypressed ~= KbName('Escape')
-    [~, keyCode] = KbWait;
+    [secs keyCode]=KbWait;
     keypressed = find(keyCode == 1);
 end
 
-try
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% screen initialization
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    Screen('Preference', 'Verbosity', 4);
-    Screen('Preference', 'VBLTimestampingMode', 3);
-    Screen('Preference', 'ConserveVRAM', 0);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% screen initialization
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    PsychDefaultSetup(2);
-    Screen('Preference', 'SkipSyncTests', p.skip_sync_tests);
-    PsychTweak('UseGPUIndex', 0);
-    InitializeMatlabOpenGL;
+Screen('Preference', 'Verbosity', 4);
+Screen('Preference','VBLTimestampingMode', 3);
+Screen('Preference','ConserveVRAM', 0);
 
-    if p.windowed_mode
-        [window, windowRect] = Screen('OpenWindow', whichScreen, 0, p.window_rect);
-    else
-        [window, windowRect] = Screen('OpenWindow', whichScreen, 0);
+PsychDefaultSetup(2);
+Screen('Preference','SkipSyncTests',skip_sync_tests);
+PsychTweak('UseGPUIndex',0);
+InitializeMatlabOpenGL;
+
+if windowed_mode
+    [window, windowRect] = Screen(whichScreen, 'OpenWindow', [], window_rect); 	% Limit screen to just a window in the top left screen corner.
+else
+    [window, windowRect] = Screen('OpenWindow', whichScreen, 0); 			                % Creates a black window the size of the screen. Pointer: window, coordinates: windowRect
+end
+
+hz = Screen('NominalFrameRate', window);
+Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+[screenXpixels, screenYpixels] = Screen('WindowSize', window);
+Screen(window, 'FillRect', [0, 0, 0]);
+white = WhiteIndex(window);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Tobii calibration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if use_eyetracking
+    Screen('TextSize', window, 30);
+    DrawFormattedText(window, ['Wir werden den Eye-Tracker schnell kalibrieren.\n' ...
+        'Auf dem nächsten Bildschirm richten Sie bitte Ihr Gesicht am Kreis aus. \n' ...
+        'Dann schauen Sie bitte auf die sich bewegenden Punkte\n'...
+        'und folgen Sie ihnen so genau wie möglich. \n' ...
+        'Drücken Sie zum Starten die Leertaste. '], 'center', 'center', white);
+
+    Screen('Flip', window);
+
+    % Press space to move on to the screening
+    [touch, secs, keyCode] = KbCheck;
+    while ~keyCode(KbName('Space'))
+        [touch, secs, keyCode] = KbCheck;
     end
 
-    Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
-    Screen(window, 'FillRect', [0, 0, 0]);
-    white = WhiteIndex(window);
+    EThndl.calibrate(window);
+    WaitSecs(1);
 
-    % everything the trial helpers need
-    hw = struct('window', window, 'windowRect', windowRect, 'white', white, ...
-        'ifi', Screen('GetFlipInterval', window), ...
-        'pd_rect', photodiode_rect(windowRect, p.photodiode_size, p.photodiode_corner), ...
-        'daq', daq, 'EThndl', EThndl, 'pa', pa, 'fs', audio_fs, 'tone', tone, 'log_dir', log_dir, 'file_prefix', p.file_prefix, ...
-        'audio_file', [p.file_prefix '_audio.wav']);
-    % continuous microphone recording of the whole session (one wav)
-    if ~isempty(pa)
-        session_audio('start', pa, audio_fs, p.mic_channels, fullfile(log_dir, hw.audio_file));
-    end
-    session_cfg.screen = struct('windowRect', windowRect, 'ifi', hw.ifi, ...
-        'nominal_hz', Screen('NominalFrameRate', window), 'pd_rect', hw.pd_rect);
+    EThndl.buffer.start('gaze');
+    paradigm_times_daq(1) = daqOut(daq, daq_eye);
+    paradigm_events_daq{1} = sprintf("gaze_on");
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% Tobii calibration
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    msg = sprintf("%i_gaze_on", daq_eye);
+    EThndl.sendMessage(msg, GetSecs);
 
-    if p.use_eyetracking
-        Screen('TextSize', window, 30);
-        DrawFormattedText(window, ['Wir werden den Eye-Tracker schnell kalibrieren.\n' ...
-            'Auf dem nächsten Bildschirm richten Sie bitte Ihr Gesicht am Kreis aus. \n' ...
-            'Dann schauen Sie bitte auf die sich bewegenden Punkte\n'...
-            'und folgen Sie ihnen so genau wie möglich. \n' ...
-            'Drücken Sie zum Starten die Leertaste. '], 'center', 'center', white);
+    WaitSecs(1);
+else
+    % no eye tracker: skip calibration screen, gaze buffer start, and
+    % associated WaitSecs pauses entirely (these are eyetracking-only
+    % waits and do not affect stimulus/trial timing below)
+    paradigm_times_daq(1) = NaN;
+    paradigm_events_daq{1} = sprintf("gaze_on_skipped_no_eyetracking");
+end
 
-        Screen('Flip', window);
 
-        % Press space to move on
-        [~, ~, keyCode] = KbCheck;
-        while ~keyCode(KbName('Space'))
-            [~, ~, keyCode] = KbCheck;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% instruction screen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[ts_instructOn_daq, ts_instructOff_daq] = mini_screening_instruction_screen_eye(window, white, ...
+    daq, daq_start_of_paradigm, daq_response, ...
+    EThndl);
+
+paradigm_times_daq(2) = ts_instructOn_daq;
+paradigm_events_daq{2} = sprintf("instructions_on");
+
+paradigm_times_daq(3) = ts_instructOff_daq;
+paradigm_events_daq{3} = sprintf("instructions_off");
+
+% session marker + train (task 4, patient, session, protocol version), as in
+% the other tasks, so the neural data can be read without the logs
+hw = struct('daq', daq, 'EThndl', EThndl);
+ev = TaskCodes.EVENTS;
+paradigm_times_daq(end+1) = send_train(hw, ev.session_start, ...
+    TaskCodes.session_train(TaskCodes.task('miniscreening'), patient_id, session_nr), 'session');
+paradigm_events_daq{end+1} = "session_start";
+outcome_values = cell(size(Images));
+
+%%%%%%%%%%%%%%%%%%%%%
+%% start of blocks
+%%%%%%%%%%%%%%%%%%%%%
+
+for block_id = 1:nm_blocks
+
+    paradigm_times_daq(end+1) = send_train(hw, daq_start_of_block, TaskCodes.block_train(block_id), ...
+        sprintf('block-%d', block_id));                        % block marker + block number
+    paradigm_events_daq{end+1} = sprintf("block_%d", block_id);
+
+    block_order = Images(block_id,:);
+
+    for trial_id = 1:length(block_order)
+        if img_randomization(block_id, trial_id) == 0, continue; end   % blocks differ in length by 1
+        %% trial train (all trial parameters), sent inside the jitter
+        t_train = GetSecs;
+        send_train(hw, ev.trial_start, trial_values{block_id, trial_id}, ...
+            sprintf('trial_block-%i_trial-%i', block_id, trial_id));
+
+        %% fixation cross
+        jitter_time = max(0, jitter_times(block_id, trial_id) - (GetSecs - t_train));
+
+        [ts_fix, ts_fix_daq] = fixation_cross_eye(jitter_time, fixation_duration, ...
+            block_id, trial_id, ...
+            window, windowRect, ...
+            daq, daq_fix_cross, ...
+            EThndl);
+
+
+        fix_times_ts(block_id, trial_id) = ts_fix;
+        fix_times_daq(block_id, trial_id) = ts_fix_daq;
+
+        %% run image
+
+        % grab image
+        img_to_show = block_order{trial_id};
+
+        % grab image details to send to eyetracker
+        img_to_show_filename = Images_mini_screening_filenames{block_id, trial_id};
+        [~, name, ext] = fileparts(img_to_show_filename);
+        img_to_show_filename = [name ext];
+
+        % show image
+
+        flip_time = GetSecs;
+        texture = Screen('MakeTexture', window, img_to_show);
+        Screen('DrawTexture', window, texture)
+        miniscr_imgOn_ts(block_id, trial_id) = Screen('Flip', window, flip_time);
+
+        % timestamp outputs
+        miniscr_imgOn_daq(block_id, trial_id) = daqOut(daq, daq_img_on);
+        if ~isempty(EThndl)
+            msg = sprintf("%i_%s", daq_img_on, img_to_show_filename);
+            EThndl.sendMessage(msg,miniscr_imgOn_ts(block_id, trial_id));
         end
 
-        EThndl.calibrate(window);
-        WaitSecs(1);
+        % wait for left arrow, right arrow, or F10 (abort) - image stays
+        % on screen until one of these is pressed
+        arrowKeys = [KbName('LeftArrow'), KbName('RightArrow'), KbName('F10')];
+        keysOfInterest = zeros(1, 256);
+        keysOfInterest(arrowKeys) = 1;
+        KbQueueCreate([], keysOfInterest);
+        KbQueueStart;
 
-        EThndl.buffer.start('gaze');
-        paradigm_times_daq(end+1) = daqOut(daq, ev.eye);
-        paradigm_events_daq{end+1} = "gaze_on";
 
-        msg = sprintf("%i_gaze_on", ev.eye);
-        EThndl.sendMessage(msg, GetSecs);
-
-        WaitSecs(1);
-    else
-        paradigm_times_daq(end+1) = NaN;
-        paradigm_events_daq{end+1} = "gaze_on_skipped_no_eyetracking";
-    end
-
-    % session marker + train: task, patient, session, protocol version
-    paradigm_times_daq(end+1) = send_train(hw, ev.session_start, ...
-        TaskCodes.session_train(p.task_type, patient_id, session_nr), 'session');
-    paradigm_events_daq{end+1} = "session_start";
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% instruction screen
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    [ts_instructOn_daq, ts_instructOff_daq] = task_instruction_screen_eye(window, white, p.instructions, ...
-        daq, ev.start_of_paradigm, ev.response, ...
-        EThndl);
-
-    paradigm_times_daq(end+1) = ts_instructOn_daq;
-    paradigm_events_daq{end+1} = "instructions_on";
-
-    paradigm_times_daq(end+1) = ts_instructOff_daq;
-    paradigm_events_daq{end+1} = "instructions_off";
-
-    %%%%%%%%%%%%%%%%%%%%%
-    %% practice (block 0, concepts that are not in the session)
-    %%%%%%%%%%%%%%%%%%%%%
-
-    aborted = false;
-    blank_onset = Screen('Flip', window);
-    if ~isempty(practice)
-        paradigm_times_daq(end+1) = send_train(hw, ev.start_of_block, TaskCodes.block_train(0), 'block-0_practice');
-        paradigm_events_daq{end+1} = "practice";
-        for k = 1:numel(practice)
-            [practice(k), blank_onset, aborted] = run_task_trial(practice(k), blank_onset, hw, p, log_dir, @spose_trial_eye);
-            if aborted, break; end
-        end
-        if ~aborted
-            Screen('TextSize', window, p.text_size_prompt);
-            DrawFormattedText(window, p.practice_end_text, 'center', 'center', white);
-            Screen('Flip', window);
-            WaitSecs(1.5);
-            blank_onset = Screen('Flip', window);
-        end
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%
-    %% trials (segments between pauses = blocks)
-    %%%%%%%%%%%%%%%%%%%%%
-
-    t_start = GetSecs;
-    n_run = 0;
-    if aborted
-        stop_reason = 'abort_practice';
-    else
-        for trial_idx = 1:numel(plan)
-            cfg = plan(trial_idx);
-
-            % stop once the minimum is reached and the time is up
-            if trial_idx > n_min_trials && (GetSecs - t_start) / 60 >= p.max_minutes
-                stop_reason = 'max_time';
-                break
+        pressed = false;
+        while ~pressed
+            [pressed, firstPress] = KbQueueCheck;
+            if ~pressed
+                WaitSecs(0.001);   % small yield so this doesn't spin the CPU at 100%
             end
-
-            % new block: pause screen (not before the first), then the block marker
-            if trial_idx == 1 || cfg.block_id ~= plan(trial_idx - 1).block_id
-                if trial_idx > 1
-                    [go_on, blank_onset] = pause_screen(window, white, p, ...
-                        sprintf('--- %d trials done (minimum %d) ---', n_run, n_min_trials));
-                    if ~go_on
-                        stop_reason = 'experimenter_stop';
-                        break
-                    end
-                end
-                paradigm_times_daq(end+1) = send_train(hw, ev.start_of_block, ...
-                    TaskCodes.block_train(cfg.block_id), sprintf('block-%i', cfg.block_id));
-                paradigm_events_daq{end+1} = sprintf("block_%d", cfg.block_id);
-            end
-
-            [plan(trial_idx), blank_onset, aborted] = run_task_trial(cfg, blank_onset, hw, p, log_dir, @spose_trial_eye);
-            n_run = trial_idx;
-            if aborted
-                stop_reason = 'abort';
-                break
-            end
         end
+
+        KbQueueStop;
+        KbQueueRelease;
+
+
+        resp_keyCode = firstPress > 0;
+
+        % F10 -> abort the screening. Close the texture we just made,
+        % log the abort, and break out of both loops (block + trial)
+        % without recording a response or running the black-screen
+        % offset for this trial. Everything collected in previous
+        % trials/blocks is left untouched and gets saved below as-is.
+        if resp_keyCode(KbName('F10'))
+            abort_early = true;
+            disp("F10 pressed - aborting mini-screening early. Saving data collected so far....");
+            Screen('Close', texture);
+            break
+        end
+
+        pat_response_ts(block_id, trial_id) = min(firstPress(resp_keyCode));
+
+        % code the response: 1 = left, 2 = right
+        if resp_keyCode(KbName('LeftArrow'))
+            pat_response_values(block_id, trial_id) = 1;
+        else
+            pat_response_values(block_id, trial_id) = 2;
+        end
+
+        pat_response_daq(block_id, trial_id) = daqOut(daq, daq_response);
+
+        Screen('Close', texture);   % release the texture now that it's no longer needed
+
+        % switch to a black screen immediately on keypress
+        Screen('FillRect', window, [0 0 0]);
+        miniscr_imgOff_ts(block_id, trial_id) = Screen('Flip', window);
+
+        % timestamp outputs
+        miniscr_imgOff_daq(block_id, trial_id) = daqOut(daq, daq_img_off);
+        if ~isempty(EThndl)
+            msg = sprintf("%i_%s", daq_img_off, img_to_show_filename);
+            EThndl.sendMessage(msg, miniscr_imgOff_ts(block_id, trial_id));
+        end
+
+        % outcome train: response (1 left, 2 right), rt from image onset
+        outcome_values{block_id, trial_id} = TaskCodes.outcome_train(pat_response_values(block_id, trial_id), ...
+            0, TaskCodes.CORRECT.not_applicable, ...
+            pat_response_ts(block_id, trial_id) - miniscr_imgOn_ts(block_id, trial_id), NaN);
+        send_train(hw, ev.trial_end, outcome_values{block_id, trial_id}, ...
+            sprintf('outcome_block-%i_trial-%i', block_id, trial_id));
+
+        % hold the black screen for exactly 0.5s, anchored to the actual flip
+        % time rather than "now"
+        WaitSecs('UntilTime', miniscr_imgOff_ts(block_id, trial_id) + blank_duration);
+
+
     end
-    minutes_run = (GetSecs - t_start) / 60;
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% end of paradigm
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    if p.use_eyetracking
-        EThndl.buffer.stop('gaze');
-        paradigm_times_daq(end+1) = daqOut(daq, ev.eye);
-        paradigm_events_daq{end+1} = "gaze_off";
-
-        msg = sprintf("%i_gaze_off", ev.eye);
-        EThndl.sendMessage(msg, GetSecs);
-    else
-        paradigm_times_daq(end+1) = NaN;
-        paradigm_events_daq{end+1} = "gaze_off_skipped_no_eyetracking";
+    if abort_early
+        break
     end
 
-catch ME
-    % save what exists, release the hardware, then report the error
-    disp("ERROR during the session - saving data collected so far....");
-    stop_reason = ['error: ' ME.message];
-    if ~exist('n_run', 'var'), n_run = 0; end
-    if ~exist('minutes_run', 'var'), minutes_run = NaN; end
-    if session_audio('active'), session_cfg.audio = session_audio('stop'); end
-    try
-        save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_reason, minutes_run, ...
-            paradigm_times_daq, paradigm_events_daq, EThndl);
-    catch ME_save
-        warning('run_miniscreening_eye:save', 'saving after the error failed too: %s', ME_save.message);
-    end
-    shut_down_task(EThndl, pa, tone);
-    rethrow(ME);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+end
+
+if use_eyetracking
+    EThndl.buffer.stop('gaze');
+    paradigm_times_daq(end+1) = daqOut(daq, daq_eye);
+    paradigm_events_daq{end+1} = sprintf("gaze_off");
+ 
+    msg = sprintf("%i_gaze_off", daq_eye);
+    EThndl.sendMessage(msg, GetSecs);
+else
+    paradigm_times_daq(end+1) = NaN;
+    paradigm_events_daq{end+1} = sprintf("gaze_off_skipped_no_eyetracking");
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% save variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if session_audio('active'), session_cfg.audio = session_audio('stop'); end
+if abort_early
+    disp("Session was aborted early (F10). Saving variables in their current state....");
+else
+    disp("Saving variables....");
+end
+ 
+%% eyetracking info
+if use_eyetracking
+    dat = EThndl.collectSessionData();
+    save(EThndl.getFileName(fullfile(log_dir, [file_prefix '_tobii_data']), true),'-struct','dat');
+else
+    % dummy placeholder in place of the real Tobii session data so
+    % downstream scripts that expect a tobii_data file still find one
+    dat = struct(...
+        'eyetracking_used', false, ...
+        'note', 'Dummy file - eyetracking was disabled for this session (use_eyetracking = false)', ...
+        'patient_id', patient_id, ...
+        'session_nr', session_nr, ...
+        'timestamp', datestr(now));
+    save(fullfile(log_dir, [file_prefix '_tobii_data_dummy.mat']), '-struct', 'dat', '-v6');
+end
 
-fprintf('Session ended (%s) after %d trials (minimum %d), %.1f min. Saving variables....\n', ...
-    stop_reason, n_run, n_min_trials, minutes_run);
-save_task_session(log_dir, p, plan, practice, stim, session_cfg, n_run, stop_reason, minutes_run, ...
-    paradigm_times_daq, paradigm_events_daq, EThndl);
+%% image presentation variables
+save(fullfile(log_dir, [file_prefix '_imgOnOff.mat']), "miniscr_imgOn_ts", "miniscr_imgOn_daq", "miniscr_imgOff_ts", "miniscr_imgOff_daq", '-v6');
+
+%% general paradigm variables
+save(fullfile(log_dir, [file_prefix '_behavioral_responses.mat']), "pat_response_values", "pat_response_ts", "pat_response_daq", "outcome_values", '-v6');
+save(fullfile(log_dir, [file_prefix '_paradigm_events.mat']), "paradigm_events_daq", "paradigm_times_daq", "abort_early", '-v6');
+save(fullfile(log_dir, [file_prefix '_fixation_events.mat']), "fix_times_ts", "fix_times_daq", "-v6");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% shut down
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-shut_down_task(EThndl, pa, tone);
+if use_eyetracking
+    EThndl.deInit();
+end
 
-% summary for run_session (all parameters are also in <file_prefix>_session_cfg.mat)
-out = struct('task', p.task_name, 'file_prefix', p.file_prefix, 'log_dir', log_dir, ...
-    'stop_reason', stop_reason, 'n_trials_run', n_run, 'minutes_run', minutes_run, 'params', p);
+Screen('CloseAll');
+
+out = struct('task', 'mini_screening', 'file_prefix', file_prefix, 'log_dir', log_dir, ...
+    'abort_early', abort_early, 'n_trials_run', sum(~isnan(miniscr_imgOn_ts(:))), ...
+    'img_names', {{img_names.name}});
 
 end
