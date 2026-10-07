@@ -15,8 +15,9 @@ function [jitter_times, ...
 %                       (blocks differ in length by at most 1)
 %   Images, Images_mini_screening_filenames : nm_blocks x n_slots, {} = no trial
 %   trial_values : nm_blocks x n_slots daq trial train (TaskCodes.trial_train:
-%                  task 4, patient, session, block, trial, axis 0, concept =
-%                  index in the session stimset, instance, level 0, rep,
+%                  task 4, patient, session, block, trial, image id = index
+%                  into img_names, axis 0, SPoSE dim 0, concept = index in the
+%                  session stimset, THINGS number, instance, level 0, rep,
 %                  trial type original 5 / name 6 / exemplar 7, no options)
 % Saved (-v6, as in dynamic) with file_prefix in front of dynamic's names.
 
@@ -29,6 +30,7 @@ tok = regexp({sess.name}, '_c(\d+)_([a-zA-Z]+?)(\d+)_inst', 'tokens', 'once');
 tok = vertcat(tok{:});
 [concepts, k] = unique(strcat(tok(:, 2), tok(:, 3)), 'stable');  % e.g. banana64
 concept_ids = str2double(tok(k, 1))';                             % c<n> in the session stimset
+things_ids = str2double(tok(k, 3))';                              % THINGS concept number
 
 fixed = {}; extra = {}; extra_concept = []; fixed_concept = [];
 fixed_type = []; extra_inst = [];
@@ -92,8 +94,8 @@ for i = 1:nm_blocks
         n_shown(it) = n_shown(it) + 1;
         trial_nr = trial_nr + 1;
         cfg = struct('task_type', TaskCodes.task('miniscreening'), 'patient_id', patient_id, ...
-            'session_nr', session_nr, 'block_id', i, 'trial_id', trial_nr, 'axis_id', 0, ...
-            'concept_id', concept_ids(concept_of(it)), 'inst_id', inst_of(it), 'level_id', 0, ...
+            'session_nr', session_nr, 'block_id', i, 'trial_id', trial_nr, 'stim_idx', it, 'axis_id', 0, 'spose_dim', 0, ...
+            'concept_id', concept_ids(concept_of(it)), 'things_id', things_ids(concept_of(it)), 'inst_id', inst_of(it), 'level_id', 0, ...
             'rep_id', n_shown(it), 'trial_type', type_of(it), 'target_pos', 0, 'option_axis_ids', []);
         trial_values{i, ci} = TaskCodes.trial_train(cfg);
     end
