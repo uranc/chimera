@@ -121,7 +121,8 @@ for ci, tid in enumerate(concepts, start=1):
             print(f'warning: only {len(photos)} THINGS photos for {cname}')
         for src_inst, ph in enumerate(photos):
             orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
-            if not os.path.exists(os.path.join(orig_dir, orig)):
+            # one copy per concept: skip if an earlier stimset already wrote it (under its own c index)
+            if not glob.glob(os.path.join(orig_dir, f'a0_original0_c*_{word(cname)}{tid}_inst{src_inst}_level0.jpg')):
                 os.makedirs(orig_dir, exist_ok=True)
                 Image.open(ph).convert('RGB').resize((RES, RES), Image.LANCZOS).save(os.path.join(orig_dir, orig), quality=95)
                 rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, 0.0))
