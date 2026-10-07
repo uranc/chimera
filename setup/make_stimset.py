@@ -53,10 +53,12 @@ ap.add_argument('--practice', action='store_true', help='write the subject pract
 ap.add_argument('--concepts', type=int, nargs='*', help='THINGS concept numbers (default: all available)')
 ap.add_argument('--things', default=THINGS_IDS, help='THINGS unique_id.txt (concept order)')
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
-ap.add_argument('--frames', type=int, nargs='*', default=FRAMES, help='generated frames used as levels 1..n (default 2 4 6)')
+ap.add_argument('--frames', type=int, nargs='*', help='generated frames used as levels 1..n (default 2 4 6; practice: 6 = max only)')
 ap.add_argument('--seed', type=int, default=1)
 ap.add_argument('--inst', type=int, nargs='*', default=[0], help='source instances to copy (default: 0; one instance per stimset)')
 a = ap.parse_args()
+if a.frames is None:
+    a.frames = [FRAMES[-1]] if a.practice else FRAMES
 orig_dir = None
 if a.out is None:
     if a.subject is None or (a.stimset is None and not a.practice):
