@@ -28,7 +28,8 @@ Practice images for that subject (other concepts, one instance):
     python3 setup/make_stimset.py --subject 1 --practice --concepts 1092 117 --inst 0
 Any other folder: --out <dir> (originals then go to <dir>/originals)
 """
-import argparse, os, shutil, sys
+import argparse, glob, os, shutil, sys
+from PIL import Image
 import numpy as np
 
 SRC = os.path.join(os.path.dirname(__file__), '..', '..', 'cso', '_pending_stimuli_realvis_cn_preview_all12')
@@ -42,6 +43,8 @@ def word(name):
     return ''.join(ch for ch in name if ch.isalnum())
 
 FRAMES = [2, 4, 6]          # levels 1..3: evenly spaced generated frames incl. the maximum
+THINGS_IMAGES = os.path.expanduser('~/Documents/THINGS-database/osfstorage/images_THINGS/object_images')
+RES = 1024                  # generated image size; originals are resized to it
 THINGS_IDS = os.path.expanduser('~/Documents/THINGS-database/behavior/variables/unique_id.txt')
 
 ap = argparse.ArgumentParser()
@@ -54,6 +57,8 @@ ap.add_argument('--concepts', type=int, nargs='*', help='THINGS concept numbers 
 ap.add_argument('--things', default=THINGS_IDS, help='THINGS unique_id.txt (concept order)')
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
 ap.add_argument('--frames', type=int, nargs='*', help='generated frames used as levels 1..n (default 2 4 6; practice: 6 = max only)')
+ap.add_argument('--things-images', default=THINGS_IMAGES)
+ap.add_argument('--n-originals', type=int, default=12, help='THINGS photos per concept in originals/ (default 12)')
 ap.add_argument('--seed', type=int, default=1)
 ap.add_argument('--inst', type=int, nargs='*', default=[0], help='source instances to copy (default: 0; one instance per stimset)')
 a = ap.parse_args()
@@ -108,17 +113,17 @@ for ci, tid in enumerate(concepts, start=1):
                 rows.append((fn, ai, word(axis), dim, ci, word(cname), tid, src_inst, lev, f, alphas[f]))
                 n += 1
     if orig_dir:
-        # originals: every source instance of the concept (mini-screening exemplars), not only --inst
-        all_insts = {}
-        for dim, axis in AXES:
-            for q in os.listdir(os.path.join(a.src, axis)):
-                if q.startswith(f'{src_stem[tid]}_inst'):
-                    all_insts.setdefault(int(q.rsplit('_inst', 1)[1]), os.path.join(a.src, axis, q))
-        for src_inst, sdir in sorted(all_insts.items()):
+        # originals: the first n THINGS photos of the concept (sorted, as the generator indexes
+        # them: inst k = photo k, so inst0 is the photo the chimera images were made from),
+        # resized to the generated resolution; mini-screening = original + exemplars
+        photos = sorted(glob.glob(os.path.join(a.things_images, cname, f'{cname}_*.jpg')))[:a.n_originals]
+        if len(photos) < a.n_originals:
+            print(f'warning: only {len(photos)} THINGS photos for {cname}')
+        for src_inst, ph in enumerate(photos):
             orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
             if not os.path.exists(os.path.join(orig_dir, orig)):
                 os.makedirs(orig_dir, exist_ok=True)
-                shutil.copyfile(os.path.join(sdir, 'f000.jpg'), os.path.join(orig_dir, orig))
+                Image.open(ph).convert('RGB').resize((RES, RES), Image.LANCZOS).save(os.path.join(orig_dir, orig), quality=95)
                 rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 0, 0, 0.0))
                 n += 1
 
