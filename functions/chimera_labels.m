@@ -93,7 +93,7 @@ if isempty(map)
     map('frog')      = 'Frosch';
     % axes (a<id>_<name>): adjectives; '-ähnlich' where a plain adjective is unclear
     map('metallicartificial') = 'metallisch';   % check
-    map('foodrelated')        = 'essbar';   % check
+    map('foodrelated')        = 'essensähnlich';   % check
     map('animalrelated')      = 'tierähnlich';   % check
     map('plantrelated')       = 'pflanzenähnlich';   % check
     map('colorfulplayful')                 = 'bunt';   % check
