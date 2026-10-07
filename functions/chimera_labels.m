@@ -92,14 +92,14 @@ if isempty(map)
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
     % axes (a<id>_<name>): adjectives; '-ähnlich' where a plain adjective is unclear
-    map('metallicartificial') = 'metallisch|künstlich';   % check
+    map('metallicartificial') = 'metallisch';   % check
     map('foodrelated')        = 'essbar';   % check
     map('animalrelated')      = 'tierähnlich';   % check
     map('plantrelated')       = 'pflanzenähnlich';   % check
-    map('colorfulplayful')                 = 'bunt|verspielt';   % check
+    map('colorfulplayful')                 = 'bunt';   % check
     map('outdoors')                         = 'draußen|Außenbereich';   % check
     map('bugrelatednonmammaliandisgusting') = 'insektenähnlich|eklig';   % check
-    map('childtoyrelatedcute')              = 'kindlich, spielzeugähnlich|niedlich';   % check
+    map('childtoyrelatedcute')              = 'spielzeugähnlich';   % check
 end
 if isKey(map, name)
     label = map(name);
