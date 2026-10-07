@@ -97,7 +97,7 @@ if isempty(map)
     map('animalrelated')      = 'tierisch';   % check
     map('plantrelated')       = 'pflanzlich';   % check
     map('colorfulplayful')                 = 'bunt|verspielt';   % check
-    map('outdoors')                         = 'draußen|im Freien';   % check
+    map('outdoors')                         = 'draußen|Außenbereich';   % check
     map('bugrelatednonmammaliandisgusting') = 'Insekt, Kriechtier|eklig';   % check
     map('childtoyrelatedcute')              = 'Kind, Spielzeug|niedlich';   % check
 end
