@@ -34,6 +34,25 @@ chim.fixation_duration = 0.3;   % prestim fixation cross
 chim.display_time   = 1.5;      % stimulus period, then the 4 words
 chim.blank_duration = 0.1;      % blank after each trial
 
+% task 2: mini-screening (task class TaskCodes.TASKS.miniscreening = 4)
+mini = struct();
+mini.stim_dir       = chim.stim_dir;        % the session's concepts and axes (words)
+mini.originals_dir  = fullfile(stim_root, 'originals');
+mini.exp_axes       = 8;
+mini.exp_concepts   = 4;
+mini.exp_levels     = 2;
+mini.exp_insts      = 1;
+mini.step_subset    = [1 2];
+mini.reps_original  = 1;        % demo: every item once (full design: original 6, name 6)
+mini.reps_name      = 1;
+mini.n_exemplars    = 11;       % THINGS instances 1..11, once each
+mini.reps_exemplar  = 1;
+mini.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
+mini.jitter_max     = 0.4;
+mini.fixation_duration = 0.3;
+mini.display_time   = 1.5;      % stimulus period, then the 4 words
+mini.blank_duration = 0.1;
+
 % task 3: naming (task class TaskCodes.TASKS.naming = 3)
 nam = struct();
 nam.stim_dir        = chim.stim_dir;
@@ -56,7 +75,7 @@ addpath(genpath(fullfile(here, 'functions')));
 log_dir = fullfile(here, 'logs', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
 if ~isfolder(log_dir), mkdir(log_dir); end
 session_record = struct('patient_id', patient_id, 'session_nr', session_nr, ...
-    'chimera_settings', chim, 'naming_settings', nam, 'started', datestr(now), 'code_version', '', 'results', struct());
+    'chimera_settings', chim, 'miniscreening_settings', mini, 'naming_settings', nam, 'started', datestr(now), 'code_version', '', 'results', struct());
 [git_status, git_out] = system(sprintf('git -C "%s" rev-parse --short HEAD', here));
 if git_status == 0, session_record.code_version = strtrim(git_out); end
 record_file = fullfile(log_dir, sprintf('session_%s.mat', datestr(now, 'yyyymmdd_HHMMSS')));
@@ -65,7 +84,9 @@ record_file = fullfile(log_dir, sprintf('session_%s.mat', datestr(now, 'yyyymmdd
 session_record.results.chimera = run_chimera_eye(patient_id, session_nr, chim);
 save(record_file, 'session_record', '-v7');
 
-%% task 2: mini-screening (not implemented yet)
+%% task 2: mini-screening (originals, written names, exemplars; 4-word choice)
+session_record.results.miniscreening = run_miniscreening_eye(patient_id, session_nr, mini);
+save(record_file, 'session_record', '-v7');
 
 %% task 3: naming (image stays on, spoken answer recorded)
 session_record.results.naming = run_naming_eye(patient_id, session_nr, nam);

@@ -34,7 +34,7 @@ classdef TaskCodes
         PROTOCOL_VERSION = 4;   % 4: axis/concept = indices within the stimulus set (1 byte each)
 
         % task ("stim class") codes
-        TASKS = struct('spose', 1, 'chimera', 2, 'naming', 3);
+        TASKS = struct('spose', 1, 'chimera', 2, 'naming', 3, 'miniscreening', 4);
 
         % event codes. 1, 2, 4, 32, 64, 128 as in run_dynamic_eye; 22 and 65 as
         % in run_mini_screening; 3, 16 and 80 are markers that are followed by
@@ -53,7 +53,8 @@ classdef TaskCodes
             'question',          128);      % 10000000 response options / prompt on
 
         % trial types (sent in TRAIN_TRIAL)
-        TRIAL_TYPES = struct('adjective', 1, 'catch', 2, 'naming', 3, 'liftable', 4);
+        TRIAL_TYPES = struct('adjective', 1, 'catch', 2, 'naming', 3, 'liftable', 4, ...
+            'original', 5, 'name', 6, 'exemplar', 7);   % 5..7: mini-screening (4 words, no target)
 
         % correctness codes (sent in TRAIN_OUTCOME)
         CORRECT = struct('wrong', 0, 'right', 1, 'not_applicable', 2);
