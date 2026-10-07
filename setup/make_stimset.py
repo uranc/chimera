@@ -55,7 +55,7 @@ ap.add_argument('--things', default=THINGS_IDS, help='THINGS unique_id.txt (conc
 ap.add_argument('--random', type=int, help='pick this many random concepts instead')
 ap.add_argument('--frames', type=int, nargs='*', default=FRAMES, help='generated frames used as levels 1..n (default 2 4 6)')
 ap.add_argument('--seed', type=int, default=1)
-ap.add_argument('--inst', type=int, nargs='*', help='source instances to copy (default: all)')
+ap.add_argument('--inst', type=int, nargs='*', default=[0], help='source instances to copy (default: 0; one instance per stimset)')
 a = ap.parse_args()
 orig_dir = None
 if a.out is None:

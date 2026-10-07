@@ -9,7 +9,7 @@
 %% settings
 patient_id = 1;
 session_nr = 1;
-stimset    = 1;                % subject<NNN>_stimset<NN>
+stimset    = 2;                % subject<NNN>_stimset<NN>
 here = fileparts(mfilename('fullpath'));
 if isempty(here), here = pwd; end     % section run with Ctrl+Enter: run from the ptb folder
 stim_root  = fullfile(here, 'stimuli', sprintf('subject%03d', patient_id));
@@ -20,12 +20,12 @@ chim.stim_dir       = fullfile(stim_root, sprintf('subject%03d_stimset%02d', pat
 chim.practice_dir   = fullfile(stim_root, 'practice');
 chim.exp_axes       = 8;        % axes in the set (a1..a8)
 chim.exp_concepts   = 4;        % concepts (c1..c4)
-chim.exp_levels     = 3;        % generated levels 1..3
+chim.exp_levels     = 2;        % generated levels 1..2
 chim.exp_insts      = 1;
-chim.step_subset    = [1 2 3];
+chim.step_subset    = [1 2];
 chim.axis_subset    = [];       % [] = all
 chim.concept_subset = [];       % [] = all
-chim.min_reps       = 6;        % reps per image (96 images x 6 = 576 trials)
+chim.min_reps       = 6;        % reps per image (64 images x 6 = 384 trials)
 chim.max_reps       = 6;
 chim.max_minutes    = 40;
 chim.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
@@ -40,9 +40,9 @@ nam.stim_dir        = chim.stim_dir;
 nam.practice_dir    = chim.practice_dir;
 nam.exp_axes        = 8;
 nam.exp_concepts    = 4;
-nam.exp_levels      = 3;
+nam.exp_levels      = 2;
 nam.exp_insts       = 1;
-nam.step_subset     = [1 2 3];
+nam.step_subset     = [1 2];
 nam.min_reps        = 1;        % every image once
 nam.max_reps        = 1;
 nam.jitter_min      = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
