@@ -34,15 +34,16 @@ o.stim_dir       = fullfile(stim_root, sprintf('subject%03d_stimset%02d', patien
 o.practice_dir   = fullfile(stim_root, 'practice');
 o.exp_axes       = 8;
 o.exp_concepts   = 4;
-o.exp_levels     = 2;
+o.exp_levels     = 1;
 o.exp_insts      = 1;
-o.step_subset    = [1 2];
+o.step_subset    = 2;          % max level only
 o.min_reps       = 1;        % every image once
 o.max_reps       = 1;
 o.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 o.jitter_max     = 0.4;
 o.fixation_duration = 0.3;
-o.display_time   = 1.5;      % image alone, then the answer tone (image stays until Space)
+o.display_time   = 1.5;      % (naming: the image stays until Space; the beep time is tone_delay)
+o.tone_delay     = 0.5;      % answer beep, s after image onset (image stays on)
 o.use_microphone = true;     % default mic; asks to go on without if none opens
 
 %% run

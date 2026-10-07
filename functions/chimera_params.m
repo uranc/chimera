@@ -147,8 +147,8 @@ end
 if numel(p.adj_keys) ~= p.n_options
     error('chimera_params:keys', 'need one adj_key per option (%d keys, %d options)', numel(p.adj_keys), p.n_options);
 end
-if p.n_options ~= 4
-    error('chimera_params:options', 'the word diamond and the trial train support exactly 4 options');
+if p.n_options < 2 || p.n_options > 4
+    error('chimera_params:options', 'the word diamond and the trial train support 2 to 4 options');
 end
 if p.naming_spread < 0 || p.naming_spread > 1
     error('chimera_params:spread', 'naming_spread must be in [0, 1]');

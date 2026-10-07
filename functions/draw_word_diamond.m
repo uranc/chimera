@@ -1,8 +1,8 @@
 function draw_word_diamond(window, windowRect, labels, white, p, chosen)
 % DRAW_WORD_DIAMOND  The adjective response screen: prompt at the top and
-% the 4 words around the screen centre, where the image was, at the
-% positions of the arrow keys: option 1 up, 2 left, 3 right, 4 down
-% (p.adj_keys = {'UpArrow','LeftArrow','RightArrow','DownArrow'}).
+% the words around the screen centre, where the image was, each at the
+% position of its arrow key (p.adj_keys; 4 options: up, left, right, down;
+% 2 options: left, right).
 % A filled arrow head points from the centre towards each word.
 % chosen (optional): index of the selected word, drawn in p.highlight_color.
 if nargin < 6, chosen = 0; end
@@ -11,7 +11,8 @@ cx = W / 2; cy = H / 2;
 r   = p.arrow_dist * H;          % centre -> arrow tip
 sz  = p.arrow_size * H;          % arrow length
 gap = 0.4 * sz;                  % arrow -> word
-dirs = [0 -1; -1 0; 1 0; 0 1];   % up, left, right, down (= option 1..4)
+key_dirs = struct('UpArrow', [0 -1], 'LeftArrow', [-1 0], 'RightArrow', [1 0], 'DownArrow', [0 1]);
+dirs = cell2mat(cellfun(@(k) key_dirs.(k), p.adj_keys(:), 'UniformOutput', false));   % option k sits at its key
 
 Screen('TextSize', window, p.text_size_prompt);
 DrawFormattedText(window, p.adj_prompt, 'center', 0.12 * H, white);

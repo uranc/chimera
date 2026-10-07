@@ -31,10 +31,30 @@ chim.max_minutes    = 40;
 chim.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 chim.jitter_max     = 0.4;
 chim.fixation_duration = 0.3;   % prestim fixation cross
-chim.display_time   = 1.5;      % stimulus period, then the 4 words
+chim.display_time   = 1.5;      % stimulus period, then the words
+chim.n_options      = 2;        % 2AFC: target + 1 other axis word
+chim.adj_keys       = {'LeftArrow', 'RightArrow'};   % option k on key k
 chim.blank_duration = 0.1;      % blank after each trial
 
-% task 2: mini-screening (task class TaskCodes.TASKS.miniscreening = 4)
+% task 2: naming (task class TaskCodes.TASKS.naming = 3)
+nam = struct();
+nam.stim_dir        = chim.stim_dir;
+nam.practice_dir    = chim.practice_dir;
+nam.exp_axes        = 8;
+nam.exp_concepts    = 4;
+nam.exp_levels      = 1;
+nam.exp_insts       = 1;
+nam.step_subset     = 2;          % max level only
+nam.min_reps        = 1;        % every image once
+nam.max_reps        = 1;
+nam.jitter_min      = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
+nam.jitter_max      = 0.4;
+nam.fixation_duration = 0.3;
+nam.display_time    = 1.5;      % (naming: the image stays until Space; the beep time is tone_delay)
+nam.tone_delay      = 0.5;     % answer beep, s after image onset (image stays on)
+nam.use_microphone  = true;
+
+% task 3: mini-screening (task class TaskCodes.TASKS.miniscreening = 4)
 mini = struct();
 mini.stim_dir       = chim.stim_dir;        % the session's concepts and axes (words)
 mini.originals_dir  = fullfile(stim_root, 'originals');
@@ -53,43 +73,26 @@ mini.fixation_duration = 0.3;
 mini.display_time   = 1.5;      % stimulus period, then the 4 words
 mini.blank_duration = 0.1;
 
-% task 3: naming (task class TaskCodes.TASKS.naming = 3)
-nam = struct();
-nam.stim_dir        = chim.stim_dir;
-nam.practice_dir    = chim.practice_dir;
-nam.exp_axes        = 8;
-nam.exp_concepts    = 4;
-nam.exp_levels      = 2;
-nam.exp_insts       = 1;
-nam.step_subset     = [1 2];
-nam.min_reps        = 1;        % every image once
-nam.max_reps        = 1;
-nam.jitter_min      = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
-nam.jitter_max      = 0.4;
-nam.fixation_duration = 0.3;
-nam.display_time    = 1.5;      % image alone, then the answer tone (image stays until Space)
-nam.use_microphone  = true;
-
 %% setup (no need to edit)
 addpath(genpath(fullfile(here, 'functions')));
 log_dir = fullfile(here, 'logs', sprintf('%d', patient_id), sprintf('%d_%d', patient_id, session_nr));
 if ~isfolder(log_dir), mkdir(log_dir); end
 session_record = struct('patient_id', patient_id, 'session_nr', session_nr, ...
-    'chimera_settings', chim, 'miniscreening_settings', mini, 'naming_settings', nam, 'started', datestr(now), 'code_version', '', 'results', struct());
+    'chimera_settings', chim, 'naming_settings', nam, 'miniscreening_settings', mini, 'started', datestr(now), 'code_version', '', 'results', struct());
 [git_status, git_out] = system(sprintf('git -C "%s" rev-parse --short HEAD', here));
 if git_status == 0, session_record.code_version = strtrim(git_out); end
 record_file = fullfile(log_dir, sprintf('session_%s.mat', datestr(now, 'yyyymmdd_HHMMSS')));
 
-%% task 1: chimera (adjective 4AFC, 96 images x 6)
+%% task 1: chimera (2AFC, 64 images x 6)
 session_record.results.chimera = run_chimera_eye(patient_id, session_nr, chim);
 save(record_file, 'session_record', '-v7');
 
-%% task 2: mini-screening (originals, written names, exemplars; 4-word choice)
-session_record.results.miniscreening = run_miniscreening_eye(patient_id, session_nr, mini);
+%% task 2: naming (image stays on, spoken answer recorded)
+session_record.results.naming = run_naming_eye(patient_id, session_nr, nam);
 save(record_file, 'session_record', '-v7');
 
-%% task 3: naming (image stays on, spoken answer recorded)
-session_record.results.naming = run_naming_eye(patient_id, session_nr, nam);
+%% task 3: mini-screening (originals, written names, exemplars; 4-word choice)
+session_record.results.miniscreening = run_miniscreening_eye(patient_id, session_nr, mini);
 save(record_file, 'session_record', '-v7');
 
 %% end of session

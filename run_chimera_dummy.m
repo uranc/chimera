@@ -45,7 +45,9 @@ o.max_minutes    = 40;
 o.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 o.jitter_max     = 0.4;
 o.fixation_duration = 0.3;   % prestim fixation cross
-o.display_time   = 1.5;      % stimulus period, then the 4 words
+o.display_time   = 1.5;      % stimulus period, then the words
+o.n_options      = 2;        % 2AFC: target + 1 other axis word
+o.adj_keys       = {'LeftArrow', 'RightArrow'};   % option k on key k
 o.blank_duration = 0.1;      % blank after each trial
 
 %% run
