@@ -57,7 +57,7 @@ p.naming_max_duration = Inf;    % naming trials: wait for the key (Inf = no time
 
 %% display
 p.image_scale       = 0.7;      % image height as a fraction of the screen height
-p.photodiode_size   = [90 25];  % px [width height], white while the image is on screen
+p.photodiode_size   = [90 75];  % px [width height], white while the image is on screen
 p.photodiode_corner = 'topright';
 p.text_size_words   = 40;       % adjective words
 p.text_size_prompt  = 34;       % prompts and messages
