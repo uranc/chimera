@@ -56,10 +56,11 @@ p.response_timeout    = Inf;    % adjective trials: words stay until a key (Inf 
 p.naming_max_duration = Inf;    % naming trials: wait for the key (Inf = no time limit)
 
 %% display
-p.image_scale       = 0.7;      % image height as a fraction of the screen height
+p.image_size        = [480 480]; % px [width height] on screen ([] = use image_scale)
+p.image_scale       = 0.7;      % image height as a fraction of the screen height (if image_size = [])
 p.photodiode_size   = [90 75];  % px [width height], white while the image is on screen
 p.photodiode_corner = 'topright';
-p.text_size_words   = 40;       % adjective words
+p.text_size_words   = 160;      % answer words (shrunk to fit the screen if needed)
 p.text_size_prompt  = 34;       % prompts and messages
 p.arrow_dist        = 0.10;     % word diamond: centre -> arrow tip (fraction of screen height); words sit just beyond
 p.arrow_size        = 0.035;    % arrow head length (fraction of screen height)

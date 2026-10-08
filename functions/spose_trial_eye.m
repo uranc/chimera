@@ -10,7 +10,7 @@ ev = TaskCodes.EVENTS;
 w = hw.window;
 lbl = sprintf('block-%i_trial-%i', cfg.block_id, cfg.trial_id);
 
-dest = image_dest_rect(img, hw.windowRect, p.image_scale);
+dest = image_dest_rect(img, hw.windowRect, image_size(p));
 tex = Screen('MakeTexture', w, img);
 Screen('DrawTexture', w, tex, [], dest);
 Screen('FillRect', w, hw.white, hw.pd_rect);
@@ -37,4 +37,11 @@ res.aborted = aborted;
 res.completed = ~aborted;
 res.daq_outcome_values = TaskCodes.outcome_train(res.response, NaN, res.correct, res.rt, NaN);
 res.ts_trial_end_daq = send_train(hw, ev.trial_end, res.daq_outcome_values, ['outcome_' lbl]);
+end
+
+
+function sz = image_size(p)
+% p.image_size ([w h] px) if set, else p.image_scale
+sz = p.image_size;
+if isempty(sz), sz = p.image_scale; end
 end

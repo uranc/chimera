@@ -25,7 +25,8 @@ o.dynamic_fcn_dir  = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment'
                       fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                       '/home/uranc/Documents/dynamic/code/experiment/functions'};
 % display
-o.text_size_words  = 20;          % smaller text for the small window
+o.text_size_words  = 80;          % answer words, px (shrunk to fit the window if needed)
+o.image_size       = [480 480];   % image on screen, px [width height]
 o.text_size_prompt = 16;
 
 % stimuli and task (same names as in run_session)

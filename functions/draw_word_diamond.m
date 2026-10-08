@@ -16,8 +16,23 @@ dirs = cell2mat(cellfun(@(k) key_dirs.(k), p.adj_keys(:), 'UniformOutput', false
 
 Screen('TextSize', window, p.text_size_prompt);
 DrawFormattedText(window, p.adj_prompt, 'center', 0.12 * H, white);
-Screen('TextSize', window, p.text_size_words);
 draw_fixation_dot(window, windowRect, p);
+% word size: p.text_size_words, smaller if a word would leave the screen
+ts = p.text_size_words;
+while ts > 10                                    % space from the arrow to the screen edge
+    Screen('TextSize', window, ts);
+    fits = true;
+    for k = 1:numel(labels)
+        b = Screen('TextBounds', window, strrep(labels{k}, '|', ''));
+        if dirs(k, 1) ~= 0
+            fits = fits && b(3) <= W / 2 - r - gap - 5 && b(4) <= H;
+        else
+            fits = fits && b(4) <= H / 2 - r - gap - 5 && b(3) <= W;
+        end
+    end
+    if fits, break; end
+    ts = floor(ts * 0.9);
+end
 for k = 1:numel(labels)
     color = white;
     if k == chosen, color = p.highlight_color; end

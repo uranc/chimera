@@ -36,6 +36,7 @@ p.fixation_duration = 0.3;
 p.response_timeout  = Inf;      % image stays until a key
 
 %% display
+p.image_size        = [480 480]; % px [width height] on screen ([] = use image_scale)
 p.image_scale       = 0.8;
 p.photodiode_size   = [90 75];  % px [width height], white while the image is on screen
 p.photodiode_corner = 'topright';

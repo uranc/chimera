@@ -31,7 +31,7 @@ H = hw.windowRect(4);
 lbl = sprintf('block-%i_trial-%i', cfg.block_id, cfg.trial_id);
 is_naming = strcmp(cfg.trial_type_name, 'naming');
 
-dest = image_dest_rect(img, hw.windowRect, p.image_scale);
+dest = image_dest_rect(img, hw.windowRect, image_size(p));
 tex = Screen('MakeTexture', w, img);
 
 %% image onset
@@ -132,4 +132,11 @@ function draw_image(w, tex, dest, hw, p)
 Screen('DrawTexture', w, tex, [], dest);
 Screen('FillRect', w, hw.white, hw.pd_rect);
 draw_fixation_dot(w, hw.windowRect, p);
+end
+
+
+function sz = image_size(p)
+% p.image_size ([w h] px) if set, else p.image_scale
+sz = p.image_size;
+if isempty(sz), sz = p.image_scale; end
 end
