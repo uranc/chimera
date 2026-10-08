@@ -96,6 +96,7 @@ if isempty(map)
     map('iceskate')  = 'Schlittschuh';
     map('spaghetti') = 'Spaghetti';
     map('toucan')    = 'Tukan';
+    map('window')    = 'Fenster';
     % axes (a<id>_<name>): adjectives; '-ähnlich' where a plain adjective is unclear
     map('metallicartificial') = 'künstlich';   % check
     map('foodrelated')        = 'essensähnlich';   % check
