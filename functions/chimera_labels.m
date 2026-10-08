@@ -91,6 +91,11 @@ if isempty(map)
     map('flashlight') = 'Taschenlampe';
     map('flute')     = 'Flöte';
     map('frog')      = 'Frosch';
+    map('battery')   = 'Batterie';
+    map('boot')      = 'Stiefel';
+    map('iceskate')  = 'Schlittschuh';
+    map('spaghetti') = 'Spaghetti';
+    map('toucan')    = 'Tukan';
     % axes (a<id>_<name>): adjectives; '-ähnlich' where a plain adjective is unclear
     map('metallicartificial') = 'künstlich';   % check
     map('foodrelated')        = 'essensähnlich';   % check
