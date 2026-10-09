@@ -20,7 +20,7 @@ Output: one folder per subject, stimuli/subject<NNN>/, holding
     originals/a0_original0_c<c>_<conceptname><things>_inst<k>_level0.jpg
         the original photos (identical on every axis, stored once; mini-screening)
     practice/   practice images (--practice), concepts outside the sessions
-Concept names must not end in a digit (the THINGS number follows directly).
+THINGS sense digits are dropped from concept names (baton4 -> baton); the THINGS number follows directly.
 
 Patient session (THINGS numbers of the screened concepts):
     python3 setup/make_stimset.py --subject 1 --stimset 1 --concepts 98 170 824 937
@@ -44,6 +44,12 @@ AXES = [(1, 'metallic-artificial'), (2, 'food-related'), (3, 'animal-related'), 
 def word(name):
     """one block of text for file names: drop dashes and anything non-alphanumeric"""
     return ''.join(ch for ch in name if ch.isalnum())
+
+
+def cword(name):
+    """concept name for file names: one block of text without a trailing THINGS sense digit
+    (baton4 -> baton, button1 -> button); the THINGS number after it keeps it unique"""
+    return word(name).rstrip('0123456789')
 
 LEVELS = [1, 2, 3]          # source levels L1..L3 -> level 1..3 (practice: L3 only)
 RAY = 'axis_sphere'
@@ -133,9 +139,6 @@ if missing:
 
 os.makedirs(a.out, exist_ok=True)
 rows, n = [], 0
-bad = [names[t] for t in concepts if word(names[t])[-1].isdigit()]
-if bad:
-    sys.exit(f'concept names ending in a digit would be ambiguous in the file name: {bad}')
 for ci, tid in enumerate(concepts, start=1):
     cname = names[tid]
     man = manifest(cname)
@@ -153,9 +156,9 @@ for ci, tid in enumerate(concepts, start=1):
                 frame, param = man.get((src_inst, axis, f'L{L}'), (-1, float('nan')))
                 if param == 0:
                     print(f'warning: {cname} {axis} L{L} is the unsteered start image (parameter 0)')
-                fn = f'a{ai}_{word(axis)}{dim}_c{ci}_{word(cname)}{tid}_inst{src_inst}_level{lev}.jpg'
+                fn = f'a{ai}_{word(axis)}{dim}_c{ci}_{cword(cname)}{tid}_inst{src_inst}_level{lev}.jpg'
                 shutil.copyfile(src, os.path.join(a.out, fn))
-                rows.append((fn, ai, word(axis), dim, ci, word(cname), tid, src_inst, f'L{L}', frame, param))
+                rows.append((fn, ai, word(axis), dim, ci, cword(cname), tid, src_inst, f'L{L}', frame, param))
                 n += 1
     if orig_dir:
         # originals: the first n THINGS photos of the concept (sorted, as the generator indexes
@@ -165,18 +168,18 @@ for ci, tid in enumerate(concepts, start=1):
         if len(photos) < a.n_originals:
             print(f'warning: only {len(photos)} THINGS photos for {cname}')
         for src_inst, ph in enumerate(photos):
-            orig = f'a0_original0_c{ci}_{word(cname)}{tid}_inst{src_inst}_level0.jpg'
+            orig = f'a0_original0_c{ci}_{cword(cname)}{tid}_inst{src_inst}_level0.jpg'
             # one copy per concept: skip if an earlier stimset already wrote it (under its own c index)
-            if not glob.glob(os.path.join(orig_dir, f'a0_original0_c*_{word(cname)}{tid}_inst{src_inst}_level0.jpg')):
+            if not glob.glob(os.path.join(orig_dir, f'a0_original0_c*_{cword(cname)}{tid}_inst{src_inst}_level0.jpg')):
                 os.makedirs(orig_dir, exist_ok=True)
                 Image.open(ph).convert('RGB').resize((RES, RES), Image.LANCZOS).save(os.path.join(orig_dir, orig), quality=95)
-                rows.append(('../originals/' + orig, 0, 'original', 0, ci, word(cname), tid, src_inst, 'L0', 0, 0.0))
+                rows.append(('../originals/' + orig, 0, 'original', 0, ci, cword(cname), tid, src_inst, 'L0', 0, 0.0))
                 n += 1
         # the written name (mini-screening), one per concept
-        nm = f'a0_name0_c{ci}_{word(cname)}{tid}_inst0_level0.jpg'
-        if not glob.glob(os.path.join(orig_dir, f'a0_name0_c*_{word(cname)}{tid}_inst0_level0.jpg')):
-            name_image(german_label(word(cname)), os.path.join(orig_dir, nm))
-            rows.append(('../originals/' + nm, 0, 'name', 0, ci, word(cname), tid, 0, 'name', 0, 0.0))
+        nm = f'a0_name0_c{ci}_{cword(cname)}{tid}_inst0_level0.jpg'
+        if not glob.glob(os.path.join(orig_dir, f'a0_name0_c*_{cword(cname)}{tid}_inst0_level0.jpg')):
+            name_image(german_label(cword(cname)), os.path.join(orig_dir, nm))
+            rows.append(('../originals/' + nm, 0, 'name', 0, ci, cword(cname), tid, 0, 'name', 0, 0.0))
             n += 1
 
 with open(os.path.join(a.out, 'stimset_map.csv'), 'w') as fh:
