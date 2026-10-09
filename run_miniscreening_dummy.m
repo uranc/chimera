@@ -19,6 +19,8 @@ o.use_eyetracking  = false;         % no Titta, dummy Tobii file
 o.windowed_mode    = true;
 o.window_rect      = [0 0 640 480];
 o.skip_sync_tests  = 1;
+o.kb_mode_name     = 'poll';        % KbCheck: also works over remote desktop
+o.image_size       = [480 480];   % image on screen, px [width height]
 % the dynamic paradigm's functions folder (daqOut, fixation_cross_eye,
 % mini_screening_instruction_screen_eye): the first existing folder is used
 o.dynamic_fcn_dir  = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment', 'functions'), ...

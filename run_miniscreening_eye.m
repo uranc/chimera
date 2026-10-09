@@ -10,7 +10,8 @@ function out = run_miniscreening_eye(patient_id, session_nr, o)
 %   run_miniscreening_eye(patient_id, session_nr)       rig
 %   run_miniscreening_eye(patient_id, session_nr, o)    o.<name> overrides the
 %       settings at the top (nm_blocks, n_exemplars, stim_dir, originals_dir,
-%       use_eyetracking, use_daq, windowed_mode, window_rect, skip_sync_tests,
+%       use_eyetracking, eye_calibrate, use_daq, windowed_mode, window_rect,
+%       skip_sync_tests, kb_mode_name, image_size, photodiode_size/_corner,
 %       jitter_min/max, fixation_duration, blank_duration, dynamic_fcn_dir)
 %
 % each image is shown until the patient responds with a L/R key press
@@ -27,6 +28,11 @@ fixation_duration = 0.3;
 blank_duration = 0.1;
 
 use_eyetracking = false;
+eye_calibrate = true;           % false: skip the calibration (Tobii keeps the last one)
+kb_mode_name = 'queue';         % 'queue' (KbQueue) | 'poll' (KbCheck, remote test); gamepad counts in both
+image_size = [480 480];         % px [width height] on screen, as chimera / naming
+photodiode_size = [90 75];      % px [width height], white while the image is on, as chimera / naming
+photodiode_corner = 'topright';
 use_daq = true;
 skip_sync_tests = 0;
 window_rect = [0, 0, 800, 600];
@@ -57,6 +63,7 @@ else
 end
 whichScreen = 0;
 KbName('UnifyKeyNames');
+kb_mode(kb_mode_name);
 
 % each time a daq event is sent, a message is sent to the Tobii.
 daq_start_of_paradigm = 1;      % 00000001  -  instruction screen
@@ -136,11 +143,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("Stimuli loaded. Press ESC to begin.");
-keypressed = 0;
-while keypressed ~= KbName('Escape')
-    [secs keyCode]=KbWait;
-    keypressed = find(keyCode == 1);
-end
+wait_for_keys({'ESCAPE'}, 'F10', Inf);        % new ESC press only (keys stuck down on Windows laptops are ignored)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,12 +170,13 @@ Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 Screen(window, 'FillRect', [0, 0, 0]);
 white = WhiteIndex(window);
+pd_rect = photodiode_rect(windowRect, photodiode_size, photodiode_corner);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Tobii calibration
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if use_eyetracking
+if use_eyetracking && eye_calibrate
     Screen('TextSize', window, 30);
     DrawFormattedText(window, ['Wir werden den Eye-Tracker schnell kalibrieren.\n' ...
         'Auf dem nächsten Bildschirm richten Sie bitte Ihr Gesicht am Kreis aus. \n' ...
@@ -183,14 +187,12 @@ if use_eyetracking
     Screen('Flip', window);
 
     % Press space to move on to the screening
-    [touch, secs, keyCode] = KbCheck;
-    while ~keyCode(KbName('Space'))
-        [touch, secs, keyCode] = KbCheck;
-    end
+    wait_for_keys({'space'}, 'F10', Inf);
 
     EThndl.calibrate(window);
     WaitSecs(1);
-
+end
+if use_eyetracking
     EThndl.buffer.start('gaze');
     paradigm_times_daq(1) = daqOut(daq, daq_eye);
     paradigm_events_daq{1} = sprintf("gaze_on");
@@ -212,7 +214,13 @@ end
 %% instruction screen
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[ts_instructOn_daq, ts_instructOff_daq] = mini_screening_instruction_screen_eye(window, white, ...
+% dynamic's mini_screening_instruction_screen_eye text, Space via wait_for_keys
+instructions = ['In dieser Aufgabe wird Ihnen eine Bilderserie gezeigt.\n' ...
+    'Wenn der Inhalt des Bildes mit einer Hand aufgenommen werden kann, \n' ...
+    'drücken Sie die Pfeiltaste nach links. \n'...
+    'Wenn nicht, drücken Sie die Pfeiltaste nach rechts.\n \n ' ...
+    'Drücken Sie zum Starten die Leertaste. '];
+[ts_instructOn_daq, ts_instructOff_daq] = task_instruction_screen_eye(window, white, instructions, ...
     daq, daq_start_of_paradigm, daq_response, ...
     EThndl);
 
@@ -277,7 +285,8 @@ for block_id = 1:nm_blocks
 
         flip_time = GetSecs;
         texture = Screen('MakeTexture', window, img_to_show);
-        Screen('DrawTexture', window, texture)
+        Screen('DrawTexture', window, texture, [], image_dest_rect(img_to_show, windowRect, image_size));
+        Screen('FillRect', window, white, pd_rect);   % photodiode: white while the image is on
         miniscr_imgOn_ts(block_id, trial_id) = Screen('Flip', window, flip_time);
 
         % timestamp outputs
@@ -289,47 +298,27 @@ for block_id = 1:nm_blocks
 
         % wait for left arrow, right arrow, or F10 (abort) - image stays
         % on screen until one of these is pressed
-        arrowKeys = [KbName('LeftArrow'), KbName('RightArrow'), KbName('F10')];
-        keysOfInterest = zeros(1, 256);
-        keysOfInterest(arrowKeys) = 1;
-        KbQueueCreate([], keysOfInterest);
-        KbQueueStart;
+        % (wait_for_keys: KbQueue or polling, gamepad included, new presses only)
+        [resp_k, t_key, abort_now] = wait_for_keys({'LeftArrow', 'RightArrow'}, 'F10', Inf, ...
+            miniscr_imgOn_ts(block_id, trial_id));
 
-
-        pressed = false;
-        while ~pressed
-            [pressed, firstPress] = KbQueueCheck;
-            if ~pressed
-                WaitSecs(0.001);   % small yield so this doesn't spin the CPU at 100%
-            end
-        end
-
-        KbQueueStop;
-        KbQueueRelease;
-
-
-        resp_keyCode = firstPress > 0;
 
         % F10 -> abort the screening. Close the texture we just made,
         % log the abort, and break out of both loops (block + trial)
         % without recording a response or running the black-screen
         % offset for this trial. Everything collected in previous
         % trials/blocks is left untouched and gets saved below as-is.
-        if resp_keyCode(KbName('F10'))
+        if abort_now
             abort_early = true;
             disp("F10 pressed - aborting mini-screening early. Saving data collected so far....");
             Screen('Close', texture);
             break
         end
 
-        pat_response_ts(block_id, trial_id) = min(firstPress(resp_keyCode));
+        pat_response_ts(block_id, trial_id) = t_key;
 
         % code the response: 1 = left, 2 = right
-        if resp_keyCode(KbName('LeftArrow'))
-            pat_response_values(block_id, trial_id) = 1;
-        else
-            pat_response_values(block_id, trial_id) = 2;
-        end
+        pat_response_values(block_id, trial_id) = resp_k;
 
         pat_response_daq(block_id, trial_id) = daqOut(daq, daq_response);
 

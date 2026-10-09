@@ -123,6 +123,7 @@ p.practice_end_text = 'Ende der Übung.';
 %% hardware and debugging (run_chimera_dummy overrides these)
 p.use_daq         = true;
 p.use_eyetracking = true;
+p.eye_calibrate   = true;       % false: skip the calibration (Tobii keeps the last one; run_session calibrates in task 1 only)
 p.which_screen    = 0;
 p.windowed_mode   = false;
 p.window_rect     = [0 0 800 600];

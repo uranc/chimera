@@ -101,11 +101,7 @@ tone = tone_open(p);                           % answer tone (sync pulse at its 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("Stimuli loaded. Press ESC to begin.");
-keypressed = 0;
-while keypressed ~= KbName('Escape')
-    [~, keyCode] = KbWait;
-    keypressed = find(keyCode == 1);
-end
+wait_for_keys({'ESCAPE'}, 'F10', Inf);        % new ESC press only (keys stuck down on Windows laptops are ignored)
 
 try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,23 +145,22 @@ try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if p.use_eyetracking
-        Screen('TextSize', window, 30);
-        DrawFormattedText(window, ['Wir werden den Eye-Tracker schnell kalibrieren.\n' ...
-            'Auf dem nächsten Bildschirm richten Sie bitte Ihr Gesicht am Kreis aus. \n' ...
-            'Dann schauen Sie bitte auf die sich bewegenden Punkte\n'...
-            'und folgen Sie ihnen so genau wie möglich. \n' ...
-            'Drücken Sie zum Starten die Leertaste. '], 'center', 'center', white);
+        if p.eye_calibrate                     % once per session (run_session: first task only)
+            Screen('TextSize', window, 30);
+            DrawFormattedText(window, ['Wir werden den Eye-Tracker schnell kalibrieren.\n' ...
+                'Auf dem nächsten Bildschirm richten Sie bitte Ihr Gesicht am Kreis aus. \n' ...
+                'Dann schauen Sie bitte auf die sich bewegenden Punkte\n'...
+                'und folgen Sie ihnen so genau wie möglich. \n' ...
+                'Drücken Sie zum Starten die Leertaste. '], 'center', 'center', white);
 
-        Screen('Flip', window);
+            Screen('Flip', window);
 
-        % Press space to move on
-        [~, ~, keyCode] = KbCheck;
-        while ~keyCode(KbName('Space'))
-            [~, ~, keyCode] = KbCheck;
+            % Press space to move on
+            wait_for_keys({'space'}, 'F10', Inf);
+
+            EThndl.calibrate(window);
+            WaitSecs(1);
         end
-
-        EThndl.calibrate(window);
-        WaitSecs(1);
 
         EThndl.buffer.start('gaze');
         paradigm_times_daq(end+1) = daqOut(daq, ev.eye);

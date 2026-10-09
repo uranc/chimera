@@ -32,6 +32,7 @@ chim.jitter_max     = 0.4;
 chim.fixation_duration = 0.3;   % prestim fixation cross
 chim.display_time   = 1.5;      % stimulus period, then the words
 chim.image_size     = [480 480];  % image on screen, px [width height]
+chim.eye_calibrate  = true;       % eye tracker calibration (once per session, here)
 chim.text_size_words = 160;     % answer words, px (shrunk to fit the screen if needed)
 chim.n_options      = 2;        % 2AFC: target + 1 other axis word
 chim.adj_keys       = {'LeftArrow', 'RightArrow'};   % option k on key k
@@ -54,6 +55,7 @@ nam.fixation_duration = 0.3;
 nam.display_time    = 1.5;      % (naming: the image stays until Space; the beep time is tone_delay)
 nam.tone_delay      = 0.5;     % answer beep, s after image onset (image stays on)
 nam.image_size      = [480 480];  % image on screen, px [width height]
+nam.eye_calibrate   = false;      % eye tracker calibrated once, in task 1
 nam.use_microphone  = true;
 
 % task 3: mini-screening (dynamic's run_mini_screening; plain daq events, no trial trains)
@@ -67,6 +69,8 @@ mini.jitter_max     = 0.4;
 mini.fixation_duration = 0.3;
 mini.blank_duration = 0.1;      % image stays until left (one hand) / right (not)
 mini.use_eyetracking = true;
+mini.eye_calibrate  = false;      % eye tracker calibrated once, in task 1
+mini.image_size     = chim.image_size;   % same image size as chimera / naming
 
 %% setup (no need to edit)
 addpath(genpath(fullfile(here, 'functions')));
