@@ -56,8 +56,13 @@ RAY = 'axis_sphere'
 THINGS_IMAGES = os.path.expanduser('~/Documents/THINGS-database/osfstorage/images_THINGS/object_images')
 RES = 1024                  # generated image size; originals are resized to it
 LABELS = os.path.join(os.path.dirname(__file__), '..', 'functions', 'chimera_labels.m')
-FONTS = ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 'C:/Windows/Fonts/arial.ttf',
-         '/Library/Fonts/Arial.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']
+# written-name images exactly as dynamic's create_text_stimuli.py (Helvetica, 288 px,
+# font size 0.1 x image size, white on black, matplotlib); Helvetica from the dynamic repo
+NAME_FONTS = [os.path.join(os.path.dirname(__file__), '..', '..', '..', 'dynamic', 'code', 'stimulus_preparation', 'fonts', 'Helvetica.ttf'),
+              os.path.expanduser('~/Documents/dynamic/code/stimulus_preparation/fonts/Helvetica.ttf'),
+              '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf']
+NAME_IMAGE_SIZE = 288
+NAME_FONT_SIZE_RATIO = 0.1
 
 
 def german_label(key):
@@ -70,14 +75,28 @@ def german_label(key):
 
 
 def name_image(text, path):
-    """the written name, white on black, RES x RES (mini-screening name trials)"""
-    from PIL import ImageDraw, ImageFont
-    font = ImageFont.truetype(next(f for f in FONTS if os.path.exists(f)), 110)
-    im = Image.new('RGB', (RES, RES), 0)
-    d = ImageDraw.Draw(im)
-    x0, y0, x1, y1 = d.textbbox((0, 0), text, font=font)
-    d.text(((RES - (x1 - x0)) / 2 - x0, (RES - (y1 - y0)) / 2 - y0), text, fill=(255, 255, 255), font=font)
-    im.save(path, quality=95)
+    """the written name as in dynamic's create_text_stimuli.py (mini-screening name trials)"""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib import font_manager as fm
+    font_path = next(f for f in NAME_FONTS if os.path.exists(f))
+    if 'Helvetica' not in font_path:
+        print(f'warning: Helvetica not found, using {font_path}')
+    font = fm.FontProperties(fname=font_path)
+    dpi = 100
+    edge = NAME_IMAGE_SIZE / dpi
+    fig = plt.figure(figsize=(edge, edge), dpi=dpi)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_aspect('equal', 'box')
+    ax.set_facecolor('black')
+    ax.text(0.5, 0.5, text, horizontalalignment='center', verticalalignment='center', color='white',
+            fontsize=NAME_IMAGE_SIZE * NAME_FONT_SIZE_RATIO, fontproperties=font, transform=ax.transAxes)
+    ax.set_xticks([]); ax.set_yticks([]); ax.set_axis_off()
+    plt.savefig(path, facecolor='black', format='jpg', dpi=dpi)
+    plt.close(fig)
+
+
 THINGS_IDS = os.path.expanduser('~/Documents/THINGS-database/behavior/variables/unique_id.txt')
 
 ap = argparse.ArgumentParser()

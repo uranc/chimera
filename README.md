@@ -28,7 +28,8 @@ code with test settings written out at their top: no daq, no eye tracker, small 
   chosen with `--levels`); `stimset_map.csv` lists source level, frame and steering parameter.
 - `originals/` the first 12 THINGS photos per concept (`a0_original0_..._inst0..11_level0.jpg`,
   inst0 = the photo the generated images start from) and the written German name
-  (`a0_name0_...jpg`); one copy per concept across stimsets (mini-screening).
+  (`a0_name0_...jpg`, made as dynamic's create_text_stimuli.py: Helvetica, 288 px); one copy per
+  concept across stimsets (mini-screening).
 - `practice/` max level only, concepts outside the session.
 
 ```
