@@ -56,7 +56,8 @@ Decisions by the PI that this design follows:
 
 - Rig: Windows, Psychtoolbox, daq + Tobii as in the current tasks; the
   dynamic repo's helpers; gamepad or keyboard.
-- 4 objects per session, 8 SPoSE axes (1, 2, 3, 5, 12, 13, 40, 54), instance 0.
+- 4 objects per session, chosen from the screening session; 8 SPoSE axes by
+  default (1, 2, 3, 5, 12, 13, 40, 54), more possible; instance 0.
 - Existing stimulus folders and file naming stay valid.
 
 ## Evidence used
@@ -189,8 +190,8 @@ in-session choices says how stable the choices are for that patient.
 
 - Timing (PI, 2026-11-23): the triplet part is also when the models are
   fitted on parts 1 and 2, so it stays in the session as long as time allows.
-  Fitting data as drafted: about 16 min, 84 distinct images. Whether the main
-  block should be extended toward 30 min is an open point.
+  Fitting data as drafted: about 16 min, 84 distinct images. The main block
+  is kept at this length (call made here); it grows with the number of axes.
 
 - Neural fits: the main block, plus the first 1.0 s of first-look trials.
 - Semantic invariance: original vs written name vs other photos.
@@ -199,6 +200,13 @@ in-session choices says how stable the choices are for that patient.
   the odd-one-out choice per steered image.
 
 ## Decided by the PI
+
+- (2026-11-23) The patient has already seen the objects in the screening
+  session, which is where the 4 objects are chosen. Naming first is the
+  cleanest; the main block is accepted as it is.
+- 4 objects and 8 axes, possibly more axes: the number of axes is a setting,
+  not fixed. Each extra axis adds 4 steered images: 4 first-look trials, 24
+  main-block trials (about 1 min) and 8 triplets per pass.
 
 - Edge cases only; free report before any words; 2AFC dropped; odd-one-out
   with 32 x 2 triplets.
