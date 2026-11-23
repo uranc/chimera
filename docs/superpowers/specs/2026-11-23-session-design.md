@@ -103,7 +103,7 @@ summaries and should be checked before being cited.
 ## The session
 
 Order: first look, main block, mini-screening, triplets (looks pass, then
-odd-one-out pass). About 28 to 30 minutes of trials. Eye tracker calibrated once,
+odd-one-out pass). About 30 to 32 minutes of trials. Eye tracker calibrated once,
 before the first look.
 
 The originals, written names and other photos are not shown until the
@@ -157,7 +157,7 @@ and without it.
   original difference; the bridge trials measure that drift.
 - 140 trials.
 
-### Part 4: triplets, two passes (about 10 min)
+### Part 4: triplets, two passes (about 12 min)
 
 The same 72 triplets are judged twice, with different instructions:
 
@@ -175,8 +175,9 @@ first so the meaning judgement cannot colour it.
 
 - Three images side by side; the patient picks one (left, down, right key).
   No time limit. Images at 360 px.
-- Triplets use only images of the session, generated and originals (PI,
-  2026-11-23); no outside anchor photos.
+- Steered and baseline triplets use only images of the session, generated
+  and originals (PI, 2026-11-23). Outside photos appear only in the anchor
+  triplets below.
 - Steered triplets: a steered image, its own original, and the steered image
   of another object on the same axis. Example: food-like boot, original
   boot, food-like battery. Each steered image is the "own" image in 2
@@ -189,7 +190,15 @@ first so the meaning judgement cannot colour it.
 - Baseline triplets: original, another photo of the same object, and the
   original of another object. 2 per object, 8 trials. The expected answer is
   the other object.
-- 72 trials per pass, a new random order in each pass; the "own" object
+- Anchor triplets, the same for every patient (PI, 2026-11-23): 16 triplets
+  of THINGS photos of objects outside the session, chosen once and then
+  frozen. They are picked from the THINGS odd-one-out data to span easy to
+  ambiguous triplets by SPoSE-predicted choice probability. They show how
+  each patient does the task on common ground, so patients with different
+  session objects can be compared with each other and with the THINGS norm.
+  If an anchor object is one of a patient's session objects, that triplet is
+  flagged in the data.
+- 88 trials per pass (64 steered, 8 baseline, 16 anchor), a new random order in each pass; the "own" object
   differs between consecutive trials; the screen position of each role is
   balanced.
 - Before the session, the SPoSE-predicted choice probabilities for every
@@ -204,7 +213,7 @@ first so the meaning judgement cannot colour it.
 
 ### Optional: the following week (behaviour only)
 
-The same 72 triplets again (both passes), on a laptop, no recording. The agreement with the
+The same 88 triplets again (both passes), on a laptop, no recording. The agreement with the
 in-session choices says how stable the choices are for that patient.
 
 ## What the analyses will use
@@ -247,7 +256,7 @@ in-session choices says how stable the choices are for that patient.
   original.
 - Main block uses a fixed 1.0 s image instead of "until key press" as in the
   dynamic mini-screening, to give every trial the same window.
-- 8 baseline triplets added; 360 px triplet images; each steered image gets
+- 16 anchor triplets and how they are chosen; 8 baseline triplets added; 360 px triplet images; each steered image gets
   two different partner objects.
 - Steered images get their SPoSE vector from the generation pipeline's
   image-to-SPoSE readout; predictions are computed at stimset build time.
