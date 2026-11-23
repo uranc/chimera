@@ -103,7 +103,7 @@ summaries and should be checked before being cited.
 ## The session
 
 Order: first look, main block, mini-screening, triplets (looks pass, then
-odd-one-out pass). About 28 minutes of trials. Eye tracker calibrated once,
+odd-one-out pass). About 28 to 30 minutes of trials. Eye tracker calibrated once,
 before the first look.
 
 The originals, written names and other photos are not shown until the
@@ -114,7 +114,14 @@ Common trial start, unchanged: blank 0.2 s plus 0 to 0.2 s jitter (trial
 train sent here), fixation cross 0.3 s, then the image at 480 x 480 px with
 the photodiode patch.
 
-### Part 1: first look (about 4 min)
+Parts 1 and 2 are one run with two phases (PI, 2026-11-23): one start, one
+instruction screen between the phases, one set of log files. They are not
+interleaved: the naming phase has a spoken interval and is paced by the
+patient, and every free report must come before any repeat of that image.
+Presentation 1 (naming phase) is tagged in the data so fits can be run with
+and without it.
+
+### Part 1: first look (about 4 to 6 min, paced by the patient)
 
 - Images: the 32 steered images, each once. 32 trials.
 - Trial: image on; a soft beep 1.0 s after onset is the cue to speak; the
