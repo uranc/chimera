@@ -103,7 +103,7 @@ summaries and should be checked before being cited.
 ## The session
 
 Order: first look, main block, mini-screening, triplets (looks pass, then
-odd-one-out pass). About 30 to 32 minutes of trials. Eye tracker calibrated once,
+odd-one-out pass). About 32 to 34 minutes of trials, before the steering part. Eye tracker calibrated once,
 before the first look.
 
 The originals, written names and other photos are not shown until the
@@ -157,7 +157,7 @@ and without it.
   original difference; the bridge trials measure that drift.
 - 140 trials.
 
-### Part 4: triplets, two passes (about 12 min)
+### Part 4: triplets, two passes (about 14 min)
 
 The same 72 triplets are judged twice, with different instructions:
 
@@ -175,38 +175,27 @@ first so the meaning judgement cannot colour it.
 
 - Three images side by side; the patient picks one (left, down, right key).
   No time limit. Images at 360 px.
-- Steered and baseline triplets use only images of the session, generated
-  and originals (PI, 2026-11-23). Outside photos appear only in the anchor
-  triplets below.
-- Steered triplets: a steered image, its own original, and the steered image
-  of another object on the same axis. Example: food-like boot, original
-  boot, food-like battery. Each steered image is the "own" image in 2
-  triplets, with two different partner objects. 64 trials.
-- Reading, odd-one-out pass: choosing the original means the shared axis
-  outweighs object identity (the two food-like images belong together);
-  choosing the partner means the steered image is still its object.
-- Reading, looks pass: choosing the partner means the steered image looks
-  like its original.
-- Baseline triplets: original, another photo of the same object, and the
-  original of another object. 2 per object, 8 trials. The expected answer is
-  the other object.
-- Anchor triplets, the same for every patient (PI, 2026-11-23): 16 triplets
-  of THINGS photos of objects outside the session, chosen once and then
-  frozen. The issue they address is categorical versus visual perceptual
-  similarity (PI, 2026-11-23): 12 are conflict triplets, where the semantic
-  model (SPoSE) and the perceptual model (the PI's PS model) predict a
-  different odd one, for example two objects of one category plus an object
-  of another category that looks like one of them; 4 are agreement triplets,
-  where both models predict the same odd one. A patient who follows the
-  instructions answers the conflict triplets differently in the looks pass
-  and the odd-one-out pass, and the agreement triplets the same. They show how
-  each patient does the task on common ground, so patients with different
-  session objects can be compared with each other and with the THINGS norm.
-  If an anchor object is one of a patient's session objects, that triplet is
-  flagged in the data.
-- 88 trials per pass (64 steered, 8 baseline, 16 anchor), a new random order in each pass; the "own" object
-  differs between consecutive trials; the screen position of each role is
-  balanced.
+- Three triplet types run side by side (PI, 2026-11-23):
+  - **Axis-driven, 64:** a real member of the axis category, the steered
+    image, and its own original. Example: real food, food-like boot, original
+    boot. Two different real photos per steered image. Category pairs the
+    steered image with the real food; appearance pairs it with its original.
+    Real photos: for each axis, THINGS objects loading highest on that SPoSE
+    dimension, excluding session and practice objects; 4 per axis, the same
+    for every patient.
+  - **Same-axis partner, 32:** the steered image, its own original, and the
+    steered image of another object on the same axis. Example: food-like
+    boot, original boot, food-like battery. Once per steered image.
+  - **Fixed conflict, 8:** THINGS photos of objects outside the session, the
+    same for every patient, chosen once and frozen: 6 where the semantic
+    model (SPoSE) and the PI's PS model predict a different odd one, 2 where
+    they agree. They show whether a patient separates the two instructions,
+    on common ground across patients. A triplet containing one of a patient's
+    session objects is flagged.
+- The issue all three address is categorical versus visual perceptual
+  similarity.
+- 104 trials per pass, a new random order in each pass; consecutive trials
+  never share an object; the screen position of each role is balanced.
 - Before the session, the SPoSE-predicted choice probabilities for every
   triplet are computed in `setup/make_stimset.py` and saved with the stimset.
   Originals and other photos use their object's row of the 66-d SPoSE matrix
@@ -219,7 +208,7 @@ first so the meaning judgement cannot colour it.
 
 ### Optional: the following week (behaviour only)
 
-The same 88 triplets again (both passes), on a laptop, no recording. The agreement with the
+The same 104 triplets again (both passes), on a laptop, no recording. The agreement with the
 in-session choices says how stable the choices are for that patient.
 
 ## What the analyses will use
