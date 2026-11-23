@@ -163,35 +163,38 @@ The same 72 triplets are judged twice, with different instructions:
 
 - **Looks pass (first):** "which picture looks most different from the other
   two?" This is the perceptual-similarity judgement. A steered image that is
-  perceptually close to its original leaves the anchor as the odd one.
+  perceptually close to its original leaves the third image as the odd one.
 - **Odd-one-out pass (second):** the standard instruction, "which one fits
   least with the other two?", as in THINGS.
 
 The dissociation the study is after shows up when the patient named the
-steered image as something else at first look, picks the anchor in the looks
-pass, and picks the original in the odd-one-out pass. The looks pass runs
+steered image as something else at first look, picks the partner object in
+the looks pass, and picks the original in the odd-one-out pass. The looks pass runs
 first so the meaning judgement cannot colour it.
 
 
-- Three images side by side; the patient picks the one that fits least with
-  the other two (left, down, right key). No time limit. Images at 360 px.
-- Steered triplets: steered image, its own original, and an anchor photo.
-  Each steered image appears in 2 triplets with different anchors. 64 trials.
-- Baseline triplets: original, another photo of the same object, and an
-  anchor. 2 per object, 8 trials. The expected answer is the anchor.
-- 72 trials per pass, a new random order in each pass, never the same object in consecutive trials;
-  the screen position of each role is balanced.
-- Anchor photos: for each axis, the 4 THINGS objects with the highest
-  loading on that SPoSE dimension, excluding the session and practice
-  objects; the first photo (sorted) of each, from the full THINGS image tree
-  (`THINGS-database/osfstorage/images_THINGS/object_images`), resized like
-  the originals. 32 photos, shown nowhere else in the session. The same
-  anchors are used for every patient unless one is a session object.
-- Reading: choosing the original as odd means the steered image moved toward
-  the anchor's meaning; choosing the anchor means it stayed the object.
+- Three images side by side; the patient picks one (left, down, right key).
+  No time limit. Images at 360 px.
+- Triplets use only images of the session, generated and originals (PI,
+  2026-11-23); no outside anchor photos.
+- Steered triplets: a steered image, its own original, and the steered image
+  of another object on the same axis. Example: food-like boot, original
+  boot, food-like battery. Each steered image is the "own" image in 2
+  triplets, with two different partner objects. 64 trials.
+- Reading, odd-one-out pass: choosing the original means the shared axis
+  outweighs object identity (the two food-like images belong together);
+  choosing the partner means the steered image is still its object.
+- Reading, looks pass: choosing the partner means the steered image looks
+  like its original.
+- Baseline triplets: original, another photo of the same object, and the
+  original of another object. 2 per object, 8 trials. The expected answer is
+  the other object.
+- 72 trials per pass, a new random order in each pass; the "own" object
+  differs between consecutive trials; the screen position of each role is
+  balanced.
 - Before the session, the SPoSE-predicted choice probabilities for every
   triplet are computed in `setup/make_stimset.py` and saved with the stimset.
-  Originals and anchors use their object's row of the 66-d SPoSE matrix
+  Originals and other photos use their object's row of the 66-d SPoSE matrix
   (`THINGS-database/behavior/variables/spose_embedding_66d_sorted.txt`). A
   steered image has no row of its own: its vector is the image-to-SPoSE
   readout the generation pipeline already uses (`cso/`), applied to the
@@ -244,22 +247,21 @@ in-session choices says how stable the choices are for that patient.
   original.
 - Main block uses a fixed 1.0 s image instead of "until key press" as in the
   dynamic mini-screening, to give every trial the same window.
-- 8 baseline triplets added; anchor selection rule (fixed across patients);
-  360 px triplet images.
+- 8 baseline triplets added; 360 px triplet images; each steered image gets
+  two different partner objects.
 - Steered images get their SPoSE vector from the generation pipeline's
   image-to-SPoSE readout; predictions are computed at stimset build time.
 - Late answers in the main block are valid; no maximum wait.
 - Daq protocol version goes to 6. No patient recording exists under version
   5, so no backward decoding is required; the old tasks stay in the repo but
   leave `run_session.m`.
-- The steered image's triplet partner is always its own original.
 
 ## Left to the builder
 
 - Task codes and daq train layout for the three parts. Requirement: the
   recording alone identifies task, image or images, their screen positions,
   presentation number, response and reaction time.
-- How anchors are added to `setup/make_stimset.py` and where they are stored.
+- How the triplet list is written by `setup/make_stimset.py`.
 - Reuse of existing trial functions versus new ones; settings layout in
   `run_session.m` and the dummy scripts.
 - German wording of the two triplet instructions.
