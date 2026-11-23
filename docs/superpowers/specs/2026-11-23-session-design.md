@@ -251,9 +251,9 @@ in-session choices says how stable the choices are for that patient.
   original.
 - Main block uses a fixed 1.0 s image instead of "until key press" as in the
   dynamic mini-screening, to give every trial the same window.
-- 16 anchor triplets: 12 conflict and 4 agreement, selected by disagreement
-  between SPoSE and the PS model on THINGS photos; 8 baseline triplets added; 360 px triplet images; each steered image gets
-  two different partner objects.
+- Triplet counts per type (64 axis-driven, 32 same-axis partner, 8 fixed
+  conflict); selection of the real axis photos and of the fixed conflict
+  triplets (by disagreement between SPoSE and the PS model); 360 px images.
 - Steered images get their SPoSE vector from the generation pipeline's
   image-to-SPoSE readout; predictions are computed at stimset build time.
 - Late answers in the main block are valid; no maximum wait.
@@ -279,5 +279,5 @@ in-session choices says how stable the choices are for that patient.
 - Which judgement format was the PS model fitted on? If it differs from
   triplets, the looks pass may need to change to match it.
 - Whether patients can keep the two triplet instructions apart: the conflict
-  anchor triplets measure this per patient.
+  fixed triplets measure this per patient.
 - Scoring scheme for the spoken reports.
