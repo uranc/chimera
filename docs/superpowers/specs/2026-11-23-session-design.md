@@ -192,8 +192,14 @@ first so the meaning judgement cannot colour it.
   the other object.
 - Anchor triplets, the same for every patient (PI, 2026-11-23): 16 triplets
   of THINGS photos of objects outside the session, chosen once and then
-  frozen. They are picked from the THINGS odd-one-out data to span easy to
-  ambiguous triplets by SPoSE-predicted choice probability. They show how
+  frozen. The issue they address is categorical versus visual perceptual
+  similarity (PI, 2026-11-23): 12 are conflict triplets, where the semantic
+  model (SPoSE) and the perceptual model (the PI's PS model) predict a
+  different odd one, for example two objects of one category plus an object
+  of another category that looks like one of them; 4 are agreement triplets,
+  where both models predict the same odd one. A patient who follows the
+  instructions answers the conflict triplets differently in the looks pass
+  and the odd-one-out pass, and the agreement triplets the same. They show how
   each patient does the task on common ground, so patients with different
   session objects can be compared with each other and with the THINGS norm.
   If an anchor object is one of a patient's session objects, that triplet is
@@ -256,7 +262,8 @@ in-session choices says how stable the choices are for that patient.
   original.
 - Main block uses a fixed 1.0 s image instead of "until key press" as in the
   dynamic mini-screening, to give every trial the same window.
-- 16 anchor triplets and how they are chosen; 8 baseline triplets added; 360 px triplet images; each steered image gets
+- 16 anchor triplets: 12 conflict and 4 agreement, selected by disagreement
+  between SPoSE and the PS model on THINGS photos; 8 baseline triplets added; 360 px triplet images; each steered image gets
   two different partner objects.
 - Steered images get their SPoSE vector from the generation pipeline's
   image-to-SPoSE readout; predictions are computed at stimset build time.
@@ -282,6 +289,6 @@ in-session choices says how stable the choices are for that patient.
 - Low-level visual control images: include, and how to generate them?
 - Which judgement format was the PS model fitted on? If it differs from
   triplets, the looks pass may need to change to match it.
-- Whether patients can keep the two triplet instructions apart; check in the
-  first pilot.
+- Whether patients can keep the two triplet instructions apart: the conflict
+  anchor triplets measure this per patient.
 - Scoring scheme for the spoken reports.
