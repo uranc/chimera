@@ -102,9 +102,13 @@ summaries and should be checked before being cited.
 
 ## The session
 
-Order: first look, main block, triplets (looks pass, then odd-one-out pass).
-About 26 minutes of trials. Eye
-tracker calibrated once, before the first look.
+Order: first look, main block, mini-screening, triplets (looks pass, then
+odd-one-out pass). About 28 minutes of trials. Eye tracker calibrated once,
+before the first look.
+
+The originals, written names and other photos are not shown until the
+mini-screening (PI, 2026-11-23), so nothing labels the steered images while
+they are named and recorded.
 
 Common trial start, unchanged: blank 0.2 s plus 0 to 0.2 s jitter (trial
 train sent here), fixation cross 0.3 s, then the image at 480 x 480 px with
@@ -112,34 +116,41 @@ the photodiode patch.
 
 ### Part 1: first look (about 4 min)
 
-- Images: the 32 steered images, then the 4 originals. Each once. 36 trials.
+- Images: the 32 steered images, each once. 32 trials.
 - Trial: image on; a soft beep 1.0 s after onset is the cue to speak; the
   image stays on; Space or a gamepad button ends the trial. No time limit.
 - Instruction: say aloud what you see. No example that names a property.
 - One continuous microphone recording, as in the current naming task.
-- Order: steered images in random order, never the same object twice in a
-  row; the 4 originals at the end.
+- Order: random, never the same object twice in a row.
 - The first 1.0 s of each trial is speech-free and counts as one presentation
   of that image for the neural data.
 - Practice: 2 images of other objects.
 
-### Part 2: main block (about 12 min)
+### Part 2: main block (about 8 min)
 
 - Question on every trial: "can it be picked up with one hand?" Left = yes,
   right = no. Same instruction text as the current mini-screening.
-- Core images, 6 presentations each: 32 steered, 4 originals, 4 written
-  names. 240 trials.
-- Other photos of each object (instances 1 to 11), once each: 44 trials.
-- 284 trials in 6 blocks; every core image once per block, the other photos
-  spread over the blocks; random order within a block, never the same object
-  twice in a row.
+- Images: the 32 steered images, 6 presentations each. 192 trials in 6
+  blocks, every image once per block, random order within a block, never the
+  same object twice in a row.
 - Trial: image on for exactly 1.0 s, then black screen. A key press is
   accepted from image onset. If it came during the image, the trial ends at
   image offset; otherwise the screen stays black until the key press. A late
   answer is a valid trial with its reaction time; no maximum wait, no repeats.
-- With part 1, every steered image and original has 7 presentations.
+- With part 1, every steered image has 7 presentations.
 
-### Part 3: triplets, two passes (about 10 min)
+### Part 3: mini-screening (about 6 min)
+
+- Same question, same trial and timing as the main block.
+- Per object: original photo x 8, written name x 8, the 11 other photos once
+  each. 108 trials in 8 blocks, as in the current mini-screening.
+- Bridge trials: every steered image once more, spread over the blocks. 32
+  trials. Originals are only ever recorded after the steered images, so a
+  slow drift in firing over the session would look like a steered-versus-
+  original difference; the bridge trials measure that drift.
+- 140 trials.
+
+### Part 4: triplets, two passes (about 10 min)
 
 The same 72 triplets are judged twice, with different instructions:
 
@@ -190,10 +201,11 @@ in-session choices says how stable the choices are for that patient.
 
 - Timing (PI, 2026-11-23): the triplet part is also when the models are
   fitted on parts 1 and 2, so it stays in the session as long as time allows.
-  Fitting data as drafted: about 16 min, 84 distinct images. The main block
+  Fitting data as drafted: about 18 min, 84 distinct images. The main block
   is kept at this length (call made here); it grows with the number of axes.
 
-- Neural fits: the main block, plus the first 1.0 s of first-look trials.
+- Neural fits: the main block and the mini-screening, plus the first 1.0 s
+  of first-look trials.
 - Semantic invariance: original vs written name vs other photos.
 - Steering effect: steered image vs its original, per axis.
 - Percept regressors: the spoken report at first look (coded by raters) and
@@ -204,6 +216,7 @@ in-session choices says how stable the choices are for that patient.
 - (2026-11-23) The patient has already seen the objects in the screening
   session, which is where the 4 objects are chosen. Naming first is the
   cleanest; the main block is accepted as it is.
+- Originals are not shown until the mini-screening at the end.
 - 4 objects and 8 axes, possibly more axes: the number of axes is a setting,
   not fixed. Each extra axis adds 4 steered images: 4 first-look trials, 24
   main-block trials (about 1 min) and 8 triplets per pass.
@@ -218,8 +231,10 @@ in-session choices says how stable the choices are for that patient.
 - The perceptual judgement is a second pass over the same triplets with a
   "looks" instruction, looks pass first.
 - Beep moved from 0.5 s to 1.0 s so the first second is speech-free.
-- Originals shown at the end of the first look, so they do not label the
-  steered images.
+- 32 bridge trials (each steered image once) inside the mini-screening, to
+  measure drift between the steered block and the originals.
+- The triplets come after the mini-screening, because each triplet shows an
+  original.
 - Main block uses a fixed 1.0 s image instead of "until key press" as in the
   dynamic mini-screening, to give every trial the same window.
 - 8 baseline triplets added; anchor selection rule (fixed across patients);
