@@ -27,6 +27,30 @@ Decisions by the PI that this design follows:
   steered image as something semantically different, yet judges it
   perceptually similar to the original.
 
+## Framework the session has to fit (PI, 2026-11-24)
+
+1. Perceptual and semantic differences are quantified for every image before
+   the session: perceptual distance to its original (the PI's PS model) and
+   semantic position and shift (SPoSE).
+2. Models are fitted directly on the firing rates of all patients, pooled.
+3. Combining the perceptual measure, the semantic measure and the fitted
+   neural models gives the informative axes, and perhaps extrapolation
+   beyond the images shown.
+
+Consequences for the task:
+- Every image a patient sees carries its quantification in the stimset
+  (PS distance to the original, SPoSE vector and shift along its axis, and
+  the image features the neural models use), written by
+  `setup/make_stimset.py` and saved with the plan.
+- Patients see different objects, so pooling works through the shared
+  feature spaces, not through shared images. Every recorded trial therefore
+  has the same format in all recording parts: 1.0 s image, same question.
+- The steering images for a session are chosen where the three sources are
+  informative: where the perceptual and the semantic account predict
+  different firing under the pooled neural model, and where the model
+  extrapolates. The pooled model exists before the session; data from the
+  same session can refine the choice if it is available in time.
+
 ## Goals
 
 - Every image type (steered, original, written name, other photos) is recorded
@@ -186,6 +210,16 @@ tagged in the data so fits can be run with and without it.
   lab's mini-screening (one-hand question, image until key press).
 
 ### Part 4: steering (10 min or more)
+
+- Selection: by the framework above. For the first patients, before a pooled
+  neural model exists, by disagreement between the PS and SPoSE measures.
+- About 6 presentations per image (PI), random order, presented like
+  main-block trials (call made here: this keeps one trial format for the
+  pooled fits). Against boredom: short rounds with a progress counter, and
+  about one new, once-shown image in every four trials.
+- Free exploration with the joystick and imagery are the later stage of this
+  part (PI): a "collection" variant, in which the patient steers and every
+  image must be visited six times, is the bridge to it.
 
 What it is for (PI): where units responded to the edge images, show the
 intermediate points of those axes and test whether firing is modulated
