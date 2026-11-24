@@ -105,149 +105,105 @@ summaries and should be checked before being cited.
 
 ## The session
 
-Order: first look, main block, mini-screening, triplets (looks pass, then
-odd-one-out pass), steering. About 40 minutes of trials. Eye tracker calibrated once,
-before the first look.
+Structure set by the PI on 2026-11-24. Before any session, the axes are
+pre-selected offline on all 200 objects of the generation study: which axes
+give a usable steered image for which object. A session then uses 4 objects
+(from the patient's screening) and 8 of those axes: 32 steered images.
 
-The originals, written names and other photos are not shown until the
-mini-screening (PI, 2026-11-23), so nothing labels the steered images while
-they are named and recorded.
+Order: naming, main block, odd-one-out (optional), mini-screening, steering.
+About 35 minutes of trials with the odd-one-out part. Eye tracker calibrated
+once, before the naming. Originals are not shown before the mini-screening.
+No axis word is shown or spoken anywhere.
 
 Common trial start, unchanged: blank 0.2 s plus 0 to 0.2 s jitter (trial
 train sent here), fixation cross 0.3 s, then the image at 480 x 480 px with
 the photodiode patch.
 
-Parts 1 and 2 are one run with two phases (PI, 2026-11-23): one start, one
-instruction screen between the phases, one set of log files. They are not
-interleaved: the naming phase has a spoken interval and is paced by the
-patient, and every free report must come before any repeat of that image.
-Presentation 1 (naming phase) is tagged in the data so fits can be run with
-and without it.
+Parts 1 and 2 are one run with two phases: one start, one instruction screen
+between the phases, one set of log files. Presentation 1 (naming phase) is
+tagged in the data so fits can be run with and without it.
 
-### Part 1: first look (about 4 to 6 min, paced by the patient)
+### Part 1: naming (about 4 to 6 min, paced by the patient)
 
-- Images: the 32 steered images, each once. 32 trials.
+- Images: the 32 steered images, each once, random order, never the same
+  object twice in a row.
 - Trial: image on; a soft beep 1.0 s after onset is the cue to speak; the
   image stays on; Space or a gamepad button ends the trial. No time limit.
 - Instruction: say aloud what you see. No example that names a property.
-- One continuous microphone recording, as in the current naming task.
-- Order: random, never the same object twice in a row.
+- One continuous microphone recording.
 - The first 1.0 s of each trial is speech-free and counts as one presentation
   of that image for the neural data.
 - Practice: 2 images of other objects.
 
-### Part 2: main block (about 9 min)
+### Part 2: main block (about 8 min)
 
-- Task: repeat detection (one-back), as in Cao et al. 2025. The patient
-  presses a key when an image is the same as the one just before. No
-  judgement about meaning. About 10% extra trials are immediate repeats;
-  they are not counted as presentations.
-- Images form a 2 x 2 relative to each object's original (PI, 2026-11-23):
-
-  |                         | semantically similar      | semantically dissimilar |
-  |-------------------------|---------------------------|-------------------------|
-  | perceptually similar    | the original (part 3)     | steered edge image      |
-  | perceptually dissimilar | other photo of the object | other session objects   |
-
-- 32 steered images and 16 other photos (4 per object), 6 presentations
-  each: 288 trials plus about 29 repeat trials, in 6 blocks; every image once
-  per block, random order, never the same object twice in a row except for
-  the repeat trials.
-- The 4 other photos per object are the ones the PI's PS model rates least
-  similar to the original (instance 0), among instances 1 to 11.
-- Trial: image on for exactly 1.0 s, then the usual blank and fixation. A key
-  press is accepted until the next image.
+- Question on every trial (PI): "would it fit in a suitcase?" Left = yes,
+  right = no. One constant question, unrelated to the axes.
+- Images: the 32 steered images, 6 presentations each. 192 trials in 6
+  blocks, every image once per block, random order, never the same object
+  twice in a row.
+- Trial: image on for exactly 1.0 s, then black screen. A key press is
+  accepted from image onset. If it came during the image, the trial ends at
+  image offset; otherwise the screen stays black until the key press. A late
+  answer is valid, with its reaction time; no maximum wait, no repeats.
 - With part 1, every steered image has 7 presentations.
 
-### Part 3: mini-screening (about 4 min)
+### Part 3: odd-one-out (optional, about 5 min)
 
-- Same task and timing as the main block.
-- Per object: original photo x 8, written name x 8, the remaining 7 other
-  photos once each. 92 trials.
-- Bridge trials: every steered image once more, spread over the blocks. 32
-  trials. Originals are only ever recorded after the steered images, so a
-  slow drift in firing over the session would look like a steered-versus-
-  original difference; the bridge trials measure that drift.
-- 124 trials plus about 12 repeat trials, in 8 blocks.
-- This departs from the lab's mini-screening, which uses the one-hand
-  question with the image on until the key press.
-
-### Part 4: triplets, two passes (about 14 min)
-
-The same 72 triplets are judged twice, with different instructions:
-
-- **Looks pass (first):** "which picture looks most different from the other
-  two?" This is the perceptual-similarity judgement. A steered image that is
-  perceptually close to its original leaves the third image as the odd one.
-- **Odd-one-out pass (second):** the standard instruction, "which one fits
-  least with the other two?", as in THINGS.
-
-The dissociation the study is after shows up when the patient named the
-steered image as something else at first look, picks the partner object in
-the looks pass, and picks the original in the odd-one-out pass. The looks pass runs
-first so the meaning judgement cannot colour it.
-
-
-- Three images side by side; the patient picks one (left, down, right key).
-  No time limit. Images at 360 px.
-- Three triplet types run side by side (PI, 2026-11-23):
-  - **Axis-driven, 64:** a real member of the axis category, the steered
-    image, and its own original. Example: real food, food-like boot, original
-    boot. Two different real photos per steered image. Category pairs the
-    steered image with the real food; appearance pairs it with its original.
-    Real photos: for each axis, THINGS objects loading highest on that SPoSE
-    dimension, excluding session and practice objects; 4 per axis, the same
-    for every patient.
-  - **Same-axis partner, 32:** the steered image, its own original, and the
-    steered image of another object on the same axis. Example: food-like
-    boot, original boot, food-like battery. Once per steered image.
-  - **Fixed conflict, 8:** THINGS photos of objects outside the session, the
-    same for every patient, chosen once and frozen: 6 where the semantic
-    model (SPoSE) and the PI's PS model predict a different odd one, 2 where
-    they agree. They show whether a patient separates the two instructions,
-    on common ground across patients. A triplet containing one of a patient's
-    session objects is flagged.
-- The issue all three address is categorical versus visual perceptual
-  similarity.
-- 104 trials per pass, a new random order in each pass; consecutive trials
-  never share an object; the screen position of each role is balanced.
-- Before the session, the SPoSE-predicted choice probabilities for every
-  triplet are computed in `setup/make_stimset.py` and saved with the stimset.
-  Originals and other photos use their object's row of the 66-d SPoSE matrix
-  (`THINGS-database/behavior/variables/spose_embedding_66d_sorted.txt`). A
-  steered image has no row of its own: its vector is the image-to-SPoSE
-  readout the generation pipeline already uses (`cso/`), applied to the
-  steered image. Choice rule: the SPoSE triplet rule of Hebart et al. 2020
-  (to be taken from the paper or its code, not from memory).
+- Whether this part runs is open (PI: "maybe, or not").
+- Three images side by side; the patient picks the one that fits least with
+  the other two (left, down, right key). No time limit. Images at 360 px.
+- Triplet (PI): two steered images of the same axis from different objects,
+  and another photo of the object of one of them. Example: food-like boot,
+  food-like battery, another boot photo. The original itself is not used,
+  because originals are held back until part 4.
+- Reading: choosing the boot photo means the shared axis binds the two
+  steered images; choosing the food-like battery means the steered boot is
+  still a boot.
+- Each steered image is the "own" image in 2 triplets with different
+  partners: 64 trials, random order, screen positions balanced.
+- SPoSE-predicted choice probabilities for every triplet are computed in
+  `setup/make_stimset.py` and saved with the stimset. Photos use their
+  object's row of the 66-d SPoSE matrix; a steered image uses the
+  image-to-SPoSE readout of the generation pipeline (`cso/`). Choice rule:
+  the SPoSE triplet rule of Hebart et al. 2020, taken from the paper or its
+  code.
 - Practice: 3 triplets of unrelated photos.
 
-### Part 5: steering (about 8 min)
+### Part 4: mini-screening (about 6 min)
 
-The intermediate steps of each continuum are shown here, not in the
-recording blocks. Two modes (PI, 2026-11-23):
+- Per object: original photo x 8, written name x 8, the 11 other photos once
+  each. 108 trials in 8 blocks, as in the current mini-screening.
+- Bridge trials: every steered image once more, spread over the blocks. 32
+  trials. Originals are only ever recorded after the steered images, so a
+  slow drift in firing would look like a steered-versus-original difference;
+  the bridge trials measure that drift.
+- Same question and timing as the main block (call made here), so originals
+  and steered images are recorded under one task. This departs from the
+  lab's mini-screening (one-hand question, image until key press).
 
-- **Mode A, behavioural closed loop (designed now).** The patient moves an
-  image along the axes with the joystick, toward images they like. Images
-  are pre-generated frames: for one object at a time, the original at the
-  centre and the steps of each axis around it. Steering is step-locked:
-  each move shows the new frame for a fixed 1.0 s before the next move is
-  accepted, so every visited frame gives the same recording window as a
-  main-block trial. Each frame shown is sent on the daq like a trial.
-- **Mode B, firing-rate driven (prepared, not runnable yet).** The image
-  moves along an axis according to a neuron's firing while the patient uses
-  imagery. It needs spikes or firing rates delivered to the task computer
-  during the session, which the rig does not do today. The task side takes a
-  number per step from an interface that a simulated signal can feed.
+### Part 5: steering (about 8 to 10 min)
 
-What it is for: where the edge images drove a response, test whether the
-intermediate steps modulate firing in a graded, roughly linear way along the
-axis, in single units and in the population, and whether perceptual or
-semantic similarity explains it.
+What it is for (PI): where units responded to the edge images, show the
+intermediate points of those axes and test whether firing is modulated
+parametrically along the axis; extend to other axes, predicted from which
+axes worked for the cells during the session; or show the predicted maximum
+and minimum stimuli for a given unit.
+
+- The images shown here are chosen from the session's own recordings, so
+  this part needs unit responses during the session. How they reach the task
+  computer is an open point; until that exists, the selection can only be
+  made from a simulated signal or before the session.
+- Presentation as in the main block (1.0 s image, same question), so the
+  intermediate points are analysed like main-block trials.
+- Two further modes were named by the PI on 2026-11-23 and are not designed
+  in detail here: the patient steering with the joystick toward images they
+  like, and firing-rate-driven steering through imagery.
 
 ### Optional: the following week (behaviour only)
 
-The same 104 triplets again (both passes), on a laptop, no recording. The agreement with the
-in-session choices says how stable the choices are for that patient.
+The odd-one-out triplets again, and a "which looks most different" pass over
+the same triplets, on a laptop, no recording.
 
 ## What the analyses will use
 
@@ -257,11 +213,11 @@ in-session choices says how stable the choices are for that patient.
   is kept at this length (call made here); it grows with the number of axes.
 
 - Neural fits: the main block and the mini-screening, plus the first 1.0 s
-  of first-look trials.
+  of naming trials.
 - Semantic invariance: original vs written name vs other photos.
 - Steering effect: steered image vs its original, per axis.
-- Percept regressors: the spoken report at first look (coded by raters) and
-  the odd-one-out choice per steered image.
+- Percept regressors: the spoken report (coded by raters) and, if part 3
+  runs, the odd-one-out choice per steered image.
 
 ## Decided by the PI
 
@@ -278,30 +234,16 @@ in-session choices says how stable the choices are for that patient.
 
 ## Calls made in this document (not yet confirmed by the PI)
 
-- Both triplet passes run inside the recording session, at the end. If time
-  is short, the odd-one-out pass is the one to move to the following week.
-- The perceptual judgement is a second pass over the same triplets with a
-  "looks" instruction, looks pass first.
-- Beep moved from 0.5 s to 1.0 s so the first second is speech-free.
-- 32 bridge trials (each steered image once) inside the mini-screening, to
-  measure drift between the steered block and the originals.
-- The triplets come after the mini-screening, because each triplet shows an
-  original.
-- Parts 2 and 3 use repeat detection with a fixed 1.0 s image, read from the
-  PI's "yeah, testing for Cao"; about 10% repeat trials.
-- Which other photos enter the main block (PS-least-similar, 4 per object).
-- Steering mode A is step-locked with a 1.0 s hold per frame; one object at
-  a time.
-- At about 40 min the session is over the 30 min target; the odd-one-out
-  pass is the first thing to move to the following week.
-- Triplet counts per type (64 axis-driven, 32 same-axis partner, 8 fixed
-  conflict); selection of the real axis photos and of the fixed conflict
-  triplets (by disagreement between SPoSE and the PS model); 360 px images.
-- Steered images get their SPoSE vector from the generation pipeline's
-  image-to-SPoSE readout; predictions are computed at stimset build time.
-- Daq protocol version goes to 6. No patient recording exists under version
-  5, so no backward decoding is required; the old tasks stay in the repo but
-  leave `run_session.m`.
+- Beep at 1.0 s so the first second of naming trials is speech-free.
+- Main block and mini-screening use a fixed 1.0 s image; late answers valid.
+- The mini-screening uses the suitcase question, not the lab's one-hand
+  question.
+- 32 bridge trials inside the mini-screening.
+- Odd-one-out: 2 triplets per steered image; 360 px images; steered images
+  get their SPoSE vector from the generation pipeline's readout.
+- Steering trials are presented like main-block trials.
+- Daq protocol version goes to 6; the old tasks stay in the repo but leave
+  `run_session.m`.
 
 ## Left to the builder
 
@@ -317,13 +259,10 @@ in-session choices says how stable the choices are for that patient.
 
 ## Open points
 
-- Can the rig deliver spikes or firing rates to the task computer during a
-  session? Decides whether steering mode B can run.
-- Steering mode A: the instruction ("images they like"), how a run ends, and
-  how many steps per axis are offered.
+- How unit responses reach the task computer during the session (part 5).
+- Whether part 3 (odd-one-out) runs, and whether a "looks" pass is wanted in
+  the session.
+- Axis pre-selection: are the 8 axes the same for all 4 objects of a session,
+  or chosen per object?
 - Low-level visual control images: include, and how to generate them?
-- Which judgement format was the PS model fitted on? If it differs from
-  triplets, the looks pass may need to change to match it.
-- Whether patients can keep the two triplet instructions apart: the conflict
-  fixed triplets measure this per patient.
 - Scoring scheme for the spoken reports.
