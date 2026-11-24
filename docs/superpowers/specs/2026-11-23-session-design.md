@@ -110,8 +110,10 @@ pre-selected offline on all 200 objects of the generation study: which axes
 give a usable steered image for which object. A session then uses 4 objects
 (from the patient's screening) and 8 of those axes: 32 steered images.
 
-Order: naming, main block, odd-one-out (optional), mini-screening, steering.
-About 35 minutes of trials with the odd-one-out part. Eye tracker calibrated
+Order: naming, main block, mini-screening, steering. About 20 minutes for
+the first three, then steering, which is the actual test (PI, 2026-11-24).
+The odd-one-out part is out of the session in favour of steering time and
+moves to the following week. Eye tracker calibrated
 once, before the naming. Originals are not shown before the mini-screening.
 No axis word is shown or spoken anywhere.
 
@@ -148,15 +150,16 @@ tagged in the data so fits can be run with and without it.
   answer is valid, with its reaction time; no maximum wait, no repeats.
 - With part 1, every steered image has 7 presentations.
 
-### Part 3: odd-one-out (optional, about 5 min)
+### Odd-one-out (not in the session; following week, behaviour only)
 
-- Whether this part runs is open (PI: "maybe, or not").
+- Removed from the session by the PI on 2026-11-24 to give its time to
+  steering.
 - Three images side by side; the patient picks the one that fits least with
   the other two (left, down, right key). No time limit. Images at 360 px.
 - Triplet (PI): two steered images of the same axis from different objects,
   and another photo of the object of one of them. Example: food-like boot,
   food-like battery, another boot photo. The original itself is not used,
-  because originals are held back until part 4.
+  because the triplets were designed to run before the originals are shown.
 - Reading: choosing the boot photo means the shared axis binds the two
   steered images; choosing the food-like battery means the steered boot is
   still a boot.
@@ -170,7 +173,7 @@ tagged in the data so fits can be run with and without it.
   code.
 - Practice: 3 triplets of unrelated photos.
 
-### Part 4: mini-screening (about 6 min)
+### Part 3: mini-screening (about 6 min)
 
 - Per object: original photo x 8, written name x 8, the 11 other photos once
   each. 108 trials in 8 blocks, as in the current mini-screening.
@@ -182,7 +185,7 @@ tagged in the data so fits can be run with and without it.
   and steered images are recorded under one task. This departs from the
   lab's mini-screening (one-hand question, image until key press).
 
-### Part 5: steering (about 8 to 10 min)
+### Part 4: steering (10 min or more)
 
 What it is for (PI): where units responded to the edge images, show the
 intermediate points of those axes and test whether firing is modulated
@@ -259,9 +262,9 @@ the same triplets, on a laptop, no recording.
 
 ## Open points
 
-- How unit responses reach the task computer during the session (part 5).
-- Whether part 3 (odd-one-out) runs, and whether a "looks" pass is wanted in
-  the session.
+- How unit responses reach the task computer during the session (part 4).
+- Steering: how many presentations per image (PI: about 6) against how many
+  intermediate points and axes; how to keep the patient engaged.
 - Axis pre-selection: are the 8 axes the same for all 4 objects of a session,
   or chosen per object?
 - Low-level visual control images: include, and how to generate them?
