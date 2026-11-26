@@ -3,12 +3,6 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 % (counterpart of static_block_eye + participant_response_eye). The run
 % script sends the trial_start train and runs fixation_cross_eye before it.
 %
-% adjective / catch trial
-%   image + photodiode on                         -> img_on
-%   at display_time: image off and words on (one flip)
-%                                                 -> img_off, question
-%   arrow key (p.adj_keys)                        -> response
-%   chosen word highlighted for p.highlight_duration, then blank screen
 % naming trial
 %   image + photodiode on                         -> img_on
 %   at display_time: soft answer tone, image stays (no text)
@@ -16,6 +10,11 @@ function [res, aborted] = chimera_trial_eye(cfg, img, hw, p)
 %   p.naming_end_keys (no time limit by default)  -> response
 %   image off, blank screen                       -> img_off
 %   voice onset estimated from the continuous session recording
+% question trial
+%   image + photodiode on, keys (p.question_keys) count from here -> img_on
+%   at exactly display_time: image off                -> img_off
+%     answered already: blank screen (rt_question < 0)
+%     not yet: question + Ja/Nein until the key        -> question, response
 % every trial ends with trial_end + TaskCodes.TRAIN_OUTCOME, also after F10
 % (aborted = true, response 0).
 %
@@ -77,33 +76,38 @@ if is_naming
     end
     res.correct = TaskCodes.CORRECT.not_applicable;
 else
-    %% image off and words on in one flip
-    draw_word_diamond(w, hw.windowRect, cfg.option_labels, hw.white, p);
+    %% yes/no question: keys count from image onset; the image stays on for
+    %% exactly display_time; if not answered by then, the question screen
+    %% (question + Ja/Nein) stays until the key
+    [k, t_key, aborted] = wait_for_keys(p.question_keys, p.abort_key, ...
+        max(p.display_time - 1.5 * hw.ifi, 0), res.ts_stim_on);
+    answered = ~aborted && k > 0;
+    if answered
+        Screen('FillRect', w, [0 0 0]);      % answered during the image: blank at display_time
+    else
+        draw_question(w, hw.windowRect, p, hw.white, 0);
+    end
     res.ts_stim_off = Screen('Flip', w, t_switch);
     res.ts_question = res.ts_stim_off;
-    if p.tone_adjective, tone_play(hw.tone, GetSecs); end
     res.ts_stim_off_daq = send_event(hw, ev.img_off, ['img_off_' lbl], res.ts_stim_off);
-    res.ts_question_daq = send_event(hw, ev.question, sprintf('words_%s_%s', lbl, ...
-        strjoin(cfg.option_names, '-')), res.ts_question);
-
-    [k, t_key, aborted] = wait_for_keys(p.adj_keys, p.abort_key, p.response_timeout, res.ts_question);
+    if ~answered && ~aborted
+        if p.tone_adjective, tone_play(hw.tone, GetSecs); end
+        res.ts_question_daq = send_event(hw, ev.question, ['question_' lbl], res.ts_question);
+        [k, t_key, aborted] = wait_for_keys(p.question_keys, p.abort_key, p.response_timeout, res.ts_question);
+    end
     res.correct = TaskCodes.CORRECT.not_applicable;
     if ~aborted && k > 0
-        res.response_key = p.adj_keys{k};
+        res.response_key = p.question_keys{k};
         res.chosen_pos = k;
-        res.chosen_axis_id = cfg.option_axis_ids(k);
-        res.chosen_label = cfg.option_labels{k};
-        if cfg.target_pos > 0
-            res.correct = double(k == cfg.target_pos);   % CORRECT.right / .wrong
-        end
+        res.chosen_label = p.question_labels{k};
         res.ts_response_daq = send_event(hw, ev.response, sprintf('response_%s_%s', lbl, ...
-            cfg.option_names{k}), t_key);
-        % feedback: the chosen word in the highlight colour, then the blank
-        draw_word_diamond(w, hw.windowRect, cfg.option_labels, hw.white, p, k);
-        t_hl = Screen('Flip', w);
-        WaitSecs('UntilTime', t_hl + p.highlight_duration);
+            p.question_labels{k}), t_key);
+        if ~answered                          % feedback only on the question screen
+            draw_question(w, hw.windowRect, p, hw.white, k);
+            t_hl = Screen('Flip', w);
+            WaitSecs('UntilTime', t_hl + p.highlight_duration);
+        end
     end
-
     Screen('FillRect', w, [0 0 0]);
     res.ts_blank = Screen('Flip', w);
 end
@@ -132,6 +136,25 @@ function draw_image(w, tex, dest, hw, p)
 Screen('DrawTexture', w, tex, [], dest);
 Screen('FillRect', w, hw.white, hw.pd_rect);
 draw_fixation_dot(w, hw.windowRect, p);
+end
+
+
+function draw_question(w, rect, p, white, hl)
+% question at the top third, answer 1 on the left half, answer 2 on the right
+% half (matches question_keys); hl > 0 draws that answer in the highlight colour
+W = rect(3); H = rect(4);
+Screen('TextSize', w, p.text_size_prompt);
+DrawFormattedText(w, p.question_text, 'center', 0.3 * H, white);
+hc = p.highlight_color;
+if white <= 1 && max(hc) > 1, hc = hc / 255; end    % PsychDefaultSetup(2): colours 0..1
+Screen('TextSize', w, min(p.text_size_words, round(0.12 * H)));
+boxes = {[0 0.4*H W/2 0.8*H], [W/2 0.4*H W 0.8*H]};
+for k = 1:2
+    col = white;
+    if k == hl, col = hc; end
+    DrawFormattedText(w, p.question_labels{k}, 'center', 'center', col, [], [], [], [], [], boxes{k});
+end
+draw_fixation_dot(w, rect, p);
 end
 
 

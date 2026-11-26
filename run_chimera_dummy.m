@@ -11,7 +11,7 @@ here = fileparts(mfilename('fullpath'));
 if isempty(here), here = pwd; end     % section run with Ctrl+Enter: run from the ptb folder
 addpath(genpath(fullfile(here, 'functions')));
 
-o = struct();
+o = struct(); 
 % hardware off
 o.use_daq          = false;         % daqOut only prints the bytes
 o.use_eyetracking  = false;         % no Titta, dummy Tobii file
@@ -25,7 +25,7 @@ o.dynamic_fcn_dir  = {fullfile(here, '..', '..', 'dynamic', 'code', 'experiment'
                       fullfile(here, '..', 'dynamic', 'code', 'experiment', 'functions'), ...
                       '/home/uranc/Documents/dynamic/code/experiment/functions'};
 % display
-o.text_size_words  = 80;          % answer words, px (shrunk to fit the window if needed)
+o.text_size_words  = 80;          % Ja / Nein, px (shrunk to fit the window if needed)
 o.image_size       = [480 480];   % image on screen, px [width height]
 o.text_size_prompt = 16;
 
@@ -35,19 +35,18 @@ o.stim_dir       = fullfile(stim_root, sprintf('subject%03d_stimset%02d', patien
 o.practice_dir   = fullfile(stim_root, 'practice');
 o.exp_axes       = 8;        % axes in the set (a1..a8)
 o.exp_concepts   = 4;        % concepts (c1..c4)
-o.exp_levels     = 2;        % generated levels 1..2
+o.step_subset    = 2;        % max steering level only (stimset02 has levels 1..2)
+o.exp_levels     = 1;        % levels left after step_subset (one)
 o.exp_insts      = 1;
-o.step_subset    = [1 2];
 o.axis_subset    = [];       % [] = all
 o.concept_subset = [];       % [] = all
-o.min_reps       = 6;        % reps per image (64 images x 6 = 384 trials)
+o.min_reps       = 6;        % reps per image (32 images x 6 = 192 trials)
 o.max_reps       = 6;
 o.jitter_min     = 0.2;      % prestim blank: 0.2 s + uniform noise < 0.2 s
 o.jitter_max     = 0.4;
 o.fixation_duration = 0.3;   % prestim fixation cross
-o.display_time   = 1.5;      % stimulus period, then the words
-o.n_options      = 2;        % 2AFC: target + 1 other axis word
-o.adj_keys       = {'LeftArrow', 'RightArrow'};   % option k on key k
+o.display_time   = 1.0;      % image on for exactly 1.0 s; a late key still counts
+% question (defaults in chimera_params): 'Passt das in einen Koffer?', left = Ja, right = Nein
 o.blank_duration = 0.1;      % blank after each trial
 
 %% run

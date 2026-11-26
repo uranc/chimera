@@ -35,24 +35,27 @@ p.pause_every_trials = 96;      % pause screen (Space = continue, F10 = end) eve
 p.min_image_gap      = 20;      % minimum trials between two presentations of the same image
 
 %% trial types
-% every presentation is an adjective trial (4 adjectives, the manipulated
-% axis's adjective + 3 others); one in every catch_every is a catch (target
-% absent). use_naming = true makes presentation 1 of every image a naming
-% trial (image stays on, spoken response recorded).
+% every presentation is a question trial: one yes/no question for every image
+% (question_text, answered with question_keys). Keys count from image onset;
+% the image stays on for exactly display_time, then the question screen stays
+% until the key (if not answered yet). use_naming = true makes presentation 1
+% of every image a naming trial (image stays on, spoken response recorded).
 p.use_naming    = false;
 p.naming_spread = 0.3;          % first presentations (naming) spread over this fraction of the minimum session
 p.spacing_floor = 0.7;          % repeats of an image no sooner than this fraction of the ideal spacing
                                 % (n_images trials); wins over naming_spread when they conflict
-p.catch_every   = 0;            % 0 = no catch trials; N = one catch (target absent) per N adjective presentations
-p.n_options     = 4;            % adjective words per trial
+p.n_options       = 2;          % answers per trial (Ja / Nein); sizes the option fields of the trial cfg
+p.question_text   = 'Passt das in einen Koffer?';
+p.question_labels = {'Ja', 'Nein'};
+p.question_keys   = {'LeftArrow', 'RightArrow'};   % label k on key k: left = Ja, right = Nein
 
 %% timing (s)
 p.jitter_min          = 0.2;    % jittered blank before the fixation cross
 p.jitter_max          = 0.4;
 p.blank_duration      = 0.1;    % fixed blank after each trial (added to the jitter)
 p.fixation_duration   = 0.3;
-p.display_time        = 1.5;    % image alone; adjective trials: image off at this time, words on
-p.response_timeout    = Inf;    % adjective trials: words stay until a key (Inf = no limit)
+p.display_time        = 1.5;    % image on for exactly this long; a key during the image counts
+p.response_timeout    = Inf;    % question screen stays until a key (Inf = no limit)
 p.naming_max_duration = Inf;    % naming trials: wait for the key (Inf = no time limit)
 
 %% display
@@ -62,8 +65,6 @@ p.photodiode_size   = [90 75];  % px [width height], white while the image is on
 p.photodiode_corner = 'topright';
 p.text_size_words   = 160;      % answer words (shrunk to fit the screen if needed)
 p.text_size_prompt  = 34;       % prompts and messages
-p.arrow_dist        = 0.10;     % word diamond: centre -> arrow tip (fraction of screen height); words sit just beyond
-p.arrow_size        = 0.035;    % arrow head length (fraction of screen height)
 p.highlight_color   = [255 200 0];  % chosen word after the key press (fixed colour)
 p.highlight_duration = 0.3;     % s the highlighted choice stays before the blank
 p.fixation_dot      = false;    % extra fixation point on the image and response screen (the pre-stimulus cross is the fixation)
@@ -71,9 +72,7 @@ p.fixation_dot_size = 8;        % px
 p.fixation_dot_color = [255 0 0];
 
 %% keys (KbName('UnifyKeyNames') names)
-% adjective option k is answered with adj_keys{k}; the word diamond places
-% option 1 up, 2 left, 3 right, 4 down to match the arrow keys.
-p.adj_keys        = {'UpArrow', 'LeftArrow', 'RightArrow', 'DownArrow'};
+% question answers: question_keys (trial types above)
 p.naming_end_keys = {'Space'};  % patient / experimenter ends the spoken response
 p.continue_key    = 'Space';
 p.abort_key       = 'F10';      % ends the session (data so far is saved)
@@ -94,28 +93,28 @@ p.voice_threshold   = 0.1;      % amplitude for the online voice-onset estimate 
 %% daq as the question pulse (sync). Naming trials: replaces the written prompt.
 p.use_tone       = true;
 p.tone_naming    = true;        % naming trials: answer tone, no text
-p.tone_delay     = [];          % s after image onset ([] = display_time, same epoch as adjective trials)
-p.tone_adjective = false;       % adjective trials: also beep when the words appear
+p.tone_delay     = [];          % s after image onset ([] = display_time, same epoch as question trials)
+p.tone_adjective = false;       % question trials: also beep when the question screen appears
 p.tone_freq      = 750;         % Hz
 p.tone_dur       = 0.12;        % s
 p.tone_volume    = 0.2;         % 0..1
 p.tone_device    = [];          % [] = default playback device
 
 %% texts (German, patient facing)
-p.instructions = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ...
-    'Schauen Sie zuerst auf das Kreuz in der Mitte des Bildschirms.\n\n' ...
-    'Nach jedem Bild erscheinen vier Wörter.\n' ...
-    'Wählen Sie mit den Pfeiltasten das Wort, das am besten zum Bild passt.\n\n' ...
-    'Drücken Sie zum Starten die Leertaste.'];
 p.instructions_naming = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ...
     'Schauen Sie zuerst auf das Kreuz in der Mitte des Bildschirms.\n\n' ...
     'Bei manchen Bildern hören Sie einen kurzen Ton, das Bild bleibt stehen:\n' ...
     'Nennen Sie dann laut das Objekt, oder beschreiben Sie, was Sie sehen.\n' ...
     'Drücken Sie eine Taste, wenn Sie fertig sind.\n\n' ...
-    'Bei den anderen Bildern verschwindet das Bild, und es erscheinen vier Wörter.\n' ...
-    'Wählen Sie mit den Pfeiltasten das Wort, das am besten zum Bild passt.\n\n' ...
+    'Bei den anderen Bildern beantworten Sie die Frage:\n%s\n' ...
+    'Linke Pfeiltaste = %s, rechte Pfeiltaste = %s.\n\n' ...
     'Drücken Sie zum Starten die Leertaste.'];   % used when use_naming = true
-p.adj_prompt      = 'Welches Wort passt am besten zum Bild?';
+p.instructions = ['Bei diesem Experiment sehen Sie eine Reihe von Bildern.\n' ...
+    'Schauen Sie zuerst auf das Kreuz in der Mitte des Bildschirms.\n\n' ...
+    'Beantworten Sie bei jedem Bild die Frage:\n%s\n\n' ...
+    'Linke Pfeiltaste = %s, rechte Pfeiltaste = %s.\n' ...
+    'Sie können antworten, sobald das Bild erscheint.\n\n' ...
+    'Drücken Sie zum Starten die Leertaste.'];   % %s: question_text, question_labels{1}, {2}
 p.naming_prompt   = 'Was ist das? Nennen Sie das Objekt oder beschreiben Sie das Bild.';
 p.pause_text      = 'Kurze Pause.';
 p.practice_end_text = 'Ende der Übung.';
@@ -138,19 +137,20 @@ if nargin >= 1 && ~isempty(overrides)
     p = apply_overrides(p, overrides);
 end
 if p.use_naming, p.instructions = p.instructions_naming; end
+p.instructions = sprintf(p.instructions, p.question_text, p.question_labels{1}, p.question_labels{2});
 check_params(p);
 end
 
 
 function check_params(p)
+if numel(p.question_keys) ~= 2 || numel(p.question_labels) ~= 2
+    error('chimera_params:question', 'need 2 question_keys and 2 question_labels');
+end
+if p.n_options ~= 2
+    error('chimera_params:options', 'n_options must be 2 (Ja / Nein)');
+end
 if p.max_reps < p.min_reps
     error('chimera_params:reps', 'max_reps (%d) < min_reps (%d)', p.max_reps, p.min_reps);
-end
-if numel(p.adj_keys) ~= p.n_options
-    error('chimera_params:keys', 'need one adj_key per option (%d keys, %d options)', numel(p.adj_keys), p.n_options);
-end
-if p.n_options < 2 || p.n_options > 4
-    error('chimera_params:options', 'the word diamond and the trial train support 2 to 4 options');
 end
 if p.naming_spread < 0 || p.naming_spread > 1
     error('chimera_params:spread', 'naming_spread must be in [0, 1]');
